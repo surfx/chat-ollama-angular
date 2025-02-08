@@ -1,0 +1,111 @@
+@import url('../../../../public/css/css_code_style.css');
+
+.container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    font-family: 'Raleway', 'Rawline', sans-serif;
+}
+
+.header,
+.footer {
+    border-bottom: 1pt solid #c6c6c6;
+    border-collapse: collapse;
+    min-height: 30px;
+    padding: 20px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    div {
+        label {
+            margin-right: 10px;
+        }
+
+        input {
+            padding: 5pt;
+            margin-right: 10px;
+            outline: none;
+        }
+
+        button {
+            padding: 5pt;
+            outline: none;
+            border: 0;
+
+            &:hover {
+                background-color: #c6c6c6;
+            }
+        }
+    }
+}
+
+.footer {
+    border-top: 1pt solid #c6c6c6;
+    min-height: 100px;
+
+    display: flex;
+    flex-direction: column;
+    
+
+    .model-select {
+        height: 75px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+
+        select { 
+            padding: 10px;
+            width: 330px;
+            margin-right: 100px;
+        }
+
+        div {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+
+            .div_mensagem {
+                display: flex;
+                justify-content: flex-end;
+                width: 250px;
+            }
+        }
+
+    }
+
+    .input-section {
+        display: flex;
+        justify-content: space-between;
+        height: 90px;
+
+        textarea {
+            width: 90%;
+            margin-right: 5px;
+            padding: 10px;
+        }
+
+        button {
+            width: 10%;
+            border: 0;
+            margin-right: 3pt;
+
+            &:hover {
+                background-color: #c6c6c6;
+            }
+        }
+    }
+}
+
+.main {
+    background-color: #f1f1f1;
+    flex: 1;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}

@@ -39,7 +39,10 @@
             "outputMode": "server",
             "ssr": {
               "entry": "src/server.ts"
-            }
+            },
+            "allowedCommonJsDependencies": [
+              "showdown"
+            ]
           },
           "configurations": {
             "production": {

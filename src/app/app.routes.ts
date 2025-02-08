@@ -1,9 +1,14 @@
 import { Routes } from '@angular/router';
-import { ChatOllamaComponent } from './components/chat-ollama/chat-ollama.component';
+import { ChatOllamaOldComponent } from './components/chat-ollama-old/chat-ollama.component-old';
+import { ChatOllamaPageComponent } from './components/chat-ollama-page/chat-ollama-page.component';
 
 export const routes: Routes = [
-    {
-      path: '',
-      component: ChatOllamaComponent
-    }
+  {
+    path: '',
+    component: ChatOllamaPageComponent
+  },
+  {
+    path: 'old',
+    component: ChatOllamaOldComponent
+  }
 ];

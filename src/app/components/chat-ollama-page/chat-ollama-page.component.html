@@ -1,0 +1,45 @@
+<app-mensagens-overlay #mensagensOverlayComponent></app-mensagens-overlay>
+
+<div class="container">
+    <header class="header">
+        <h1><i class="fa-solid fa-comment"></i> Chat Ollama</h1>
+
+        <div>
+            <label for="config_ollama_api">Api Ollama</label>
+            <input type="text" id="config_ollama_api" [(ngModel)]="configuracoes!.ollama_api" />
+            <button (click)="btnSalvarConfiguracoes()">Salvar</button>
+        </div>
+
+    </header>
+    <main class="main" id="response">
+
+    </main>
+    <footer class="footer">
+        
+        <div class="model-select">
+            <select [(ngModel)]="selectedModel" id="selModelos">
+                @if (!modelos || modelos.length <= 0) {
+                    <option value="loading">Loading models...</option>
+                } @else {
+                    @for (modelo of modelos; track $index) {
+                        <option [value]="modelo.name">{{ modelo.name }}</option>
+                    }
+                }
+            </select>
+            <div>
+                <label for="temperature">Temperatura</label>
+                <input type="range" id="temperature" min="0" max="2" step="0.1" [(ngModel)]="configuracoes.configuracoes!.temperatura"> {{configuracoes.configuracoes!.temperatura}}
+
+                <div class="div_mensagem">
+                    <app-mensagens #mensagemComponente></app-mensagens>
+                </div>
+            </div>
+        </div>
+        <div class="input-section">
+            <textarea placeholder="Digite sua mensagem..." [(ngModel)]="userPrompt" id="txtUserPrompt"></textarea>
+            <button (click)="btnLimparMensagem()" id="btnLimpar">Limpar</button>
+            <button (click)="btnEnviarMensagem()" id="btnEnviar">Enviar</button>
+        </div>
+
+    </footer>
+</div>

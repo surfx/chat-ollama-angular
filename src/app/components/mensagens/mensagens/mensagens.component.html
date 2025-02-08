@@ -1,0 +1,6 @@
+@if(visivel()){
+    <div class="mensagem {{tipoMensagem}}">
+        <i class="{{icon}}"></i> 
+        <div [innerHTML]="mensagem()" class="mensagemTexto"></div>
+    </div>
+}

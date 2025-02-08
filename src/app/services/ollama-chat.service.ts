@@ -1,38 +1,57 @@
 import { Injectable } from '@angular/core';
-import ollama, { ListResponse, ModelResponse } from 'ollama'
+import { Ollama, ModelResponse } from 'ollama';
 import { Observable } from 'rxjs';
+import * as Showdown from 'showdown';
 
 @Injectable({
   providedIn: 'root'
 })
 export class OllamaChatService {
 
-  //private const api = 'http://localhost:11434/';
+  //private const api = 'http://localhost:11434/'; http://192.168.0.2:11434
+  // ex: http://192.168.0.2:11434/api/tags
 
+  //private showdown  = require('showdown');
+  private converter = new Showdown.Converter();
+  private ollama = new Ollama({ host: 'http://192.168.0.2:11434' });
 
-  constructor() { }
+  public setHost(host: string) {
+    if (!host || host.trim().length <= 0) { return; }
+    this.ollama = new Ollama({ host: host });
+  }
 
-  public async teste() {
-    // const response = ollama.generate({
-    //   model: 'deepseek-r1:7b',
-    //   prompt: 'What color is the sky at different times of the day?',
-    //   stream: false,
-    //   system: 'Responda em português BR',
-    // });
+  public chatOllama(userPrompt: string, modelo = 'deepseek-v2:16b', temperatura: number = 0.7): Observable<string> {
+    return new Observable<string>((observer) => {
+      const streamResponse = this.ollama.chat({
+        model: modelo,
+        messages: [{ role: 'user', content: userPrompt }],
+        stream: true,
+        options: {
+          temperature: temperatura
+        }
+      });
 
-    // response.then(response => {
-    //   console.log(response.response);
-    // });
-
-    ollama.list().then(response => {
-      console.log(response);
+      (async () => {
+        try {
+          let fullResponse = '';
+          for await (const chunk of await streamResponse) {
+            if (chunk.message && chunk.message.content) {
+              fullResponse += chunk.message.content;
+            }
+          }
+          const htmlResponse = this.converter.makeHtml(fullResponse);
+          observer.next(htmlResponse);
+          observer.complete();
+        } catch (error) {
+          observer.error(error);
+        }
+      })();
     });
-
   }
 
   public listaModelos(): Observable<ModelResponse[]> {
     return new Observable<ModelResponse[]>((observer) => {
-      ollama.list()
+      this.ollama.list()
         .then((response) => {
           observer.next(response.models);
           observer.complete();

@@ -1,0 +1,59 @@
+.mensagem {
+    padding: 25px;
+    margin: 10px 0;
+    display: flex;
+    align-items: center;
+
+    i {
+        margin-right: 10px;
+    }
+}
+
+.info {
+    background-color: #d4e5ff;
+    color: #000;
+
+    i {
+        color: #155bcb;
+    }
+}
+
+.sucesso {
+    background-color: #e3f5e1;
+    color: #000;
+
+    i {
+        color: #168821;
+    }
+}
+
+.alerta {
+    background-color: #fff5c2;
+    color: #000;
+
+    i {
+        color: #FFA500;
+    }
+}
+
+.erro {
+    background-color: #fde0db;
+
+    i {
+        color: #e52207;
+    }
+}
+
+.neutro {
+    background-color: #D3D3D3;
+    color: #000;
+
+    i {
+        color: #808080;
+    }
+}
+
+.mensagemTexto {
+    display: flex;
+    align-items: center;
+}
