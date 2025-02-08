@@ -1,7 +1,9 @@
 # Chat ollama
 
 Projeto angular de chat com o [ollama](https://ollama.com/)
-<img src="https://ollama.com/public/ollama.png" alt="ollama" width="20">
+
+
+![](readme_imagens/ollama_readme.png)
 
 ![](readme_imagens/chat_ollama.png)
 
@@ -13,6 +15,8 @@ Projeto angular de chat com o [ollama](https://ollama.com/)
 | Node            | 22.13.1    |
 | Package Manager | npm 10.9.2 |
 | nvm             | 0.40.1     |
+
+ollama
 
 # Start
 
@@ -66,3 +70,4 @@ npm i -g json-server
 - [Fonte Awesome cdn](https://cdnjs.com/libraries/font-awesome)
 - [https://www.npmjs.com/package/json-server](https://www.npmjs.com/package/json-server)
 - [loading editor](https://loading.io/#editor)
+- [Table to Markdown](https://tabletomarkdown.com/convert-spreadsheet-to-markdown/)
