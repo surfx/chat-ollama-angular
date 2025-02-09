@@ -20,6 +20,20 @@
     justify-content: space-between;
     align-items: center;
 
+    h1 {
+        display: flex;
+        align-items: center;
+
+        img {
+            width: 20px;
+            margin-right: 5px;
+        }
+        i {
+            margin-right: 10px;
+            align-self: flex-start;
+        }
+    }
+
     div {
         label {
             margin-right: 10px;
@@ -108,4 +122,5 @@
     padding: 20px;
     display: flex;
     flex-direction: column;
+    overflow: auto;
 }

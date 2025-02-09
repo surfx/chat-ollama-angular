@@ -2,7 +2,10 @@
 
 <div class="container">
     <header class="header">
-        <h1><i class="fa-solid fa-comment"></i> Chat Ollama</h1>
+        <h1>
+            <img src="/imagens/ollama.png" alt="Chat Ollama">
+            <i class="fa-regular fa-comment"></i> Chat Ollama
+        </h1>
 
         <div>
             <label for="config_ollama_api">Api Ollama</label>
@@ -12,7 +15,7 @@
 
     </header>
     <main class="main" id="response">
-
+        <app-chat-display #appchatdisplay></app-chat-display>
     </main>
     <footer class="footer">
         

@@ -15,3 +15,8 @@ export enum TipoMensagem {
     ERRO = 'erro',
     NEUTRO = 'neutro'
 }
+
+export interface ChatItemMessage {
+    is_ollama: boolean;
+    mensagem: string;
+}

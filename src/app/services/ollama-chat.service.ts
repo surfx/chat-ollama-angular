@@ -20,7 +20,12 @@ export class OllamaChatService {
     this.ollama = new Ollama({ host: host });
   }
 
-  public chatOllama(userPrompt: string, modelo = 'deepseek-v2:16b', temperatura: number = 0.7): Observable<string> {
+  public chatOllama(
+    userPrompt: string,
+    modelo = 'deepseek-v2:16b',
+    temperatura: number = 0.7,
+    converterMarkdown: boolean = true
+  ): Observable<string> {
     return new Observable<string>((observer) => {
       const streamResponse = this.ollama.chat({
         model: modelo,
@@ -39,8 +44,8 @@ export class OllamaChatService {
               fullResponse += chunk.message.content;
             }
           }
-          const htmlResponse = this.converter.makeHtml(fullResponse);
-          observer.next(htmlResponse);
+          const rt = !converterMarkdown ? fullResponse : this.converter.makeHtml(fullResponse);
+          observer.next(rt);
           observer.complete();
         } catch (error) {
           observer.error(error);

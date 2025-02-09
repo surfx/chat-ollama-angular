@@ -1,17 +1,24 @@
 import { CommonModule } from '@angular/common';
-import { Component, ViewChild, ViewEncapsulation } from '@angular/core';
+import { Component, signal, ViewChild, ViewEncapsulation } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ModelResponse } from 'ollama';
 import { delay } from 'rxjs';
 import { Configuracoes, TipoMensagem } from '../../model/modelos';
 import { ConfiguracoesService } from '../../services/configuracoes.service';
 import { OllamaChatService } from '../../services/ollama-chat.service';
+import { ChatDisplayComponent } from '../auxiliar/chat-display/chat-display.component';
 import { MensagensOverlayComponent } from '../mensagens/mensagens-overlay/mensagens-overlay.component';
 import { MensagensComponent } from '../mensagens/mensagens/mensagens.component';
 
 @Component({
   selector: 'app-chat-ollama-page',
-  imports: [CommonModule, FormsModule, MensagensComponent, MensagensOverlayComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    MensagensComponent,
+    MensagensOverlayComponent,
+    ChatDisplayComponent
+  ],
   templateUrl: './chat-ollama-page.component.html',
   styleUrl: './chat-ollama-page.component.scss',
   encapsulation: ViewEncapsulation.None
@@ -20,6 +27,7 @@ export class ChatOllamaPageComponent {
 
   @ViewChild('mensagemComponente') mensagemComponente: MensagensComponent | undefined;
   @ViewChild('mensagensOverlayComponent') mensagensOverlayComponent: MensagensOverlayComponent | undefined;
+  @ViewChild('appchatdisplay') appchatdisplay: ChatDisplayComponent | undefined;
 
   private readonly loadingImg = '<img src="/imagens/loading.svg" alt="" style="width: 40px;" width="40" />';
 
@@ -50,7 +58,7 @@ export class ChatOllamaPageComponent {
     });
 
     // Teste
-    this.userPrompt = 'Crie uma classe Java que trate uma String de forma a remover todos os caracteres que não sejam A-B';
+    this.userPrompt = 'Crie uma classe em Java para tratar caracteres da String valorTeste que não estejam no range entre A e Z, use regex';
   }
 
   //#region btns
@@ -67,6 +75,7 @@ export class ChatOllamaPageComponent {
     this.userPrompt = '';
     let txtUserPrompt = document.getElementById('txtUserPrompt') as HTMLInputElement;
     !!txtUserPrompt && txtUserPrompt.focus();
+    this.appchatdisplay?.limparMensagens();
   }
 
   btnEnviarMensagem() {
@@ -84,7 +93,7 @@ export class ChatOllamaPageComponent {
       let temperatura = this.configuracoes.configuracoes!.temperatura;
       if (!temperatura || temperatura < 0) { temperatura = 0.7; this.configuracoes.configuracoes!.temperatura = temperatura; }
 
-      this.updateResponse('');
+      this.sendUserPrompt(this.userPrompt);
 
       if (!!txtUserPrompt) {
         txtUserPrompt.focus();
@@ -96,12 +105,13 @@ export class ChatOllamaPageComponent {
 
       this.mensagensOverlayComponent?.show(`Aguarde: consultando a api Ollama ${this.loadingImg}`, TipoMensagem.NEUTRO, -1);
       this.ollamaChatService.chatOllama(
-        this.userPrompt, this.selectedModel, temperatura).subscribe({
+        this.userPrompt, this.selectedModel, temperatura, false).subscribe({
           next: (res) => {
-            this.addBtnCopiarCodigo(res);
+            this.sendOllamaResponse(res);
+            //this.addBtnCopiarCodigo(res);
           },
           error: (err) => {
-            this.updateResponse(err);
+            this.sendOllamaResponse(err);
             this.mensagemComponente?.show('Erro na comunicação com o Ollama', TipoMensagem.ERRO, 700);
           },
           complete: () => {
@@ -117,7 +127,6 @@ export class ChatOllamaPageComponent {
           }
         });
     } else {
-
       this.mensagensOverlayComponent?.show(`Aguarde: consultando a api Ollama ${this.loadingImg}`, TipoMensagem.NEUTRO, -1);
       this.testeResposta();
       this.mensagensOverlayComponent?.hide();
@@ -126,12 +135,27 @@ export class ChatOllamaPageComponent {
   }
   //#endregion
 
-  private updateResponse(response: string) {
-    document.getElementById('response')!.innerHTML = response;
+  private sendUserPrompt(userPrompt: string) {
+    this.appchatdisplay?.adicionarMensagem({
+      is_ollama: false,
+      mensagem: userPrompt
+    });
+    let txtUserPrompt = document.getElementById('txtUserPrompt') as HTMLInputElement;
+    !!txtUserPrompt && txtUserPrompt.focus();
+  }
+
+  private sendOllamaResponse(response: string) {
+    this.appchatdisplay?.adicionarMensagem({
+      is_ollama: true,
+      mensagem: response
+    });
+    this.userPrompt = '';
   }
 
 
   private testeResposta() {
+    !!this.userPrompt && this.sendUserPrompt(this.userPrompt);
+
     const resposta = `
     <p>Aqui está um exemplo simples em Java para criar uma classe que remove todos os caracteres que não são 'A' ou 'B':</p>
     <pre><code class="java language-java">public class RemoveNonAB {
@@ -180,36 +204,37 @@ export class ChatOllamaPageComponent {
     <p>O método principal chama este método e exibe tanto a string original quanto a string limpa resultante.</p>
     `;
 
-    this.addBtnCopiarCodigo(resposta);
+    //this.addBtnCopiarCodigo(resposta);
+    this.sendOllamaResponse(resposta + resposta + resposta);
   }
 
-  private addBtnCopiarCodigo(resposta: string): void {
-    if (!resposta) return;
-    const { mensagem, idCounter } = this.addBtnCopiarCodigoRegex(resposta);
-    if (idCounter <= 0) { this.updateResponse(mensagem); return; }
-    this.updateResponse(mensagem);
-    for (let i = 0; i < idCounter; i++) {
-      const button = document.getElementById(`btnCopiar-${i}`) as HTMLButtonElement;
-      const contexto = this;
-      !!button && button.addEventListener('click', () => this.copyToClipboard(`llama-code-${i}`, contexto));
-    }
-  }
+  // private addBtnCopiarCodigo(resposta: string): void {
+  //   if (!resposta) return;
+  //   const { mensagem, idCounter } = this.addBtnCopiarCodigoRegex(resposta);
+  //   if (idCounter <= 0) { this.updateResponse(mensagem); return; }
+  //   this.updateResponse(mensagem);
+  //   for (let i = 0; i < idCounter; i++) {
+  //     const button = document.getElementById(`btnCopiar-${i}`) as HTMLButtonElement;
+  //     const contexto = this;
+  //     !!button && button.addEventListener('click', () => this.copyToClipboard(`llama-code-${i}`, contexto));
+  //   }
+  // }
 
-  private addBtnCopiarCodigoRegex(mensagem: string): { mensagem: string, idCounter: number } {
-    let idCounter = 0;
-    const preCodeRegex = /<pre><code class="([\w-]+) language-([\w-]+)">/g;
-    let match;
+  // private addBtnCopiarCodigoRegex(mensagem: string): { mensagem: string, idCounter: number } {
+  //   let idCounter = 0;
+  //   const preCodeRegex = /<pre><code class="([\w-]+) language-([\w-]+)">/g;
+  //   let match;
 
-    while ((match = preCodeRegex.exec(mensagem)) !== null) {
-      const startIndex = match.index;
-      const endIndex = mensagem.indexOf('</code>', startIndex);
-      if (endIndex !== -1) {
-        mensagem = mensagem.slice(0, startIndex) + `<br /><pre><code class="${match[1]} language-${match[2]}" id="llama-code-${idCounter}">    ` + mensagem.slice(startIndex + match[0].length, endIndex) + `</code><button class="copy-button" id="btnCopiar-${idCounter}">Copiar</button></pre><br />` + mensagem.slice(endIndex + 7);
-        idCounter++;
-      }
-    }
-    return { mensagem, idCounter };
-  }
+  //   while ((match = preCodeRegex.exec(mensagem)) !== null) {
+  //     const startIndex = match.index;
+  //     const endIndex = mensagem.indexOf('</code>', startIndex);
+  //     if (endIndex !== -1) {
+  //       mensagem = mensagem.slice(0, startIndex) + `<br /><pre><code class="${match[1]} language-${match[2]}" id="llama-code-${idCounter}">    ` + mensagem.slice(startIndex + match[0].length, endIndex) + `</code><button class="copy-button" id="btnCopiar-${idCounter}">Copiar</button></pre><br />` + mensagem.slice(endIndex + 7);
+  //       idCounter++;
+  //     }
+  //   }
+  //   return { mensagem, idCounter };
+  // }
 
   public copyToClipboard(codeId: string, contexto: any) {
     const codeElement = document.getElementById(codeId) as HTMLElement;
