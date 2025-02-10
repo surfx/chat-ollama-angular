@@ -1,6 +1,6 @@
 @for (mensagem of mensagens; track $index) {
     <div class="chat-container">
-        <div class="chat-profile-pic">
+        <div class="chat-profile-pic" id="chat-profile-pic-{{$index}}">
             @if(mensagem.is_ollama){
                 <img src="/imagens/ollama.png" alt="Perfil" />
             } @else {
@@ -8,7 +8,11 @@
             }
         </div>
         <div class="chat-resposta">
-            <markdown lineNumbers [data]="mensagem.mensagem"></markdown>
+            @if(!mensagem.is_loading){
+                <markdown lineNumbers [data]="mensagem.mensagem"></markdown>
+            } @else {
+                <div class="chat_loading_llama" [innerHTML]="mensagem.mensagem"></div>
+            }
         </div>
     </div>
 }

@@ -9,6 +9,13 @@
         margin-left: 20px;
         text-align: left;
         align-self: center;
+
+
+        .chat_loading_llama {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
     }
 
     .chat-profile-pic {

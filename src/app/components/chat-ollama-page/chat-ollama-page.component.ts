@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, signal, ViewChild, ViewEncapsulation } from '@angular/core';
+import { Component, ViewChild, ViewEncapsulation } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ModelResponse } from 'ollama';
 import { delay } from 'rxjs';
@@ -28,8 +28,6 @@ export class ChatOllamaPageComponent {
   @ViewChild('mensagemComponente') mensagemComponente: MensagensComponent | undefined;
   @ViewChild('mensagensOverlayComponent') mensagensOverlayComponent: MensagensOverlayComponent | undefined;
   @ViewChild('appchatdisplay') appchatdisplay: ChatDisplayComponent | undefined;
-
-  private readonly loadingImg = '<img src="/imagens/loading.svg" alt="" style="width: 40px;" width="40" />';
 
   public configuracoes: Partial<Configuracoes> = {
     configuracoes: {
@@ -84,6 +82,7 @@ export class ChatOllamaPageComponent {
     if (!test) {
       let txtUserPrompt = document.getElementById('txtUserPrompt') as HTMLInputElement;
       let selModelos = document.getElementById('selModelos') as HTMLSelectElement;
+      let btnLimpar = document.getElementById('btnLimpar') as HTMLButtonElement;
       let btnEnviar = document.getElementById('btnEnviar') as HTMLButtonElement;
       let temperature = document.getElementById('temperature') as HTMLInputElement;
 
@@ -100,10 +99,11 @@ export class ChatOllamaPageComponent {
         txtUserPrompt.disabled = true;
       }
       if (!!selModelos) { selModelos.disabled = true; }
+      if (!!btnLimpar) { btnLimpar.disabled = true; }
       if (!!btnEnviar) { btnEnviar.disabled = true; }
       if (!!temperature) { temperature.disabled = true; }
 
-      this.mensagensOverlayComponent?.show(`Aguarde: consultando a api Ollama ${this.loadingImg}`, TipoMensagem.NEUTRO, -1);
+      this.loadingChat();
       this.ollamaChatService.chatOllama(
         this.userPrompt, this.selectedModel, temperatura, false).subscribe({
           next: (res) => {
@@ -116,20 +116,24 @@ export class ChatOllamaPageComponent {
           },
           complete: () => {
             this.mensagensOverlayComponent?.hide();
+            this.loadingChat(false);
             if (!!txtUserPrompt) {
               txtUserPrompt.disabled = false;
               txtUserPrompt.focus();
               //this.userPrompt = '';
             }
             if (!!selModelos) { selModelos.disabled = false; }
+            if (!!btnLimpar) { btnLimpar.disabled = false; }
             if (!!btnEnviar) { btnEnviar.disabled = false; }
             if (!!temperature) { temperature.disabled = false; }
           }
         });
     } else {
-      this.mensagensOverlayComponent?.show(`Aguarde: consultando a api Ollama ${this.loadingImg}`, TipoMensagem.NEUTRO, -1);
-      this.testeResposta();
-      this.mensagensOverlayComponent?.hide();
+      this.loadingChat();
+      setTimeout(() => {
+        this.testeResposta();
+        this.loadingChat(false);
+      }, 1200);
     }
 
   }
@@ -152,9 +156,8 @@ export class ChatOllamaPageComponent {
     this.userPrompt = '';
   }
 
-
   private testeResposta() {
-    !!this.userPrompt && this.sendUserPrompt(this.userPrompt);
+    this.sendUserPrompt('Testando');
 
     const resposta = `
     <p>Aqui está um exemplo simples em Java para criar uma classe que remove todos os caracteres que não são 'A' ou 'B':</p>
@@ -205,7 +208,7 @@ export class ChatOllamaPageComponent {
     `;
 
     //this.addBtnCopiarCodigo(resposta);
-    this.sendOllamaResponse(resposta + resposta + resposta);
+    this.sendOllamaResponse(resposta);
   }
 
   // private addBtnCopiarCodigo(resposta: string): void {
@@ -248,5 +251,12 @@ export class ChatOllamaPageComponent {
     });
   }
 
+  private loadingChat(isLoading: boolean = true) {
+    !!isLoading ? this.appchatdisplay?.loadingMessage() : this.appchatdisplay?.removeLoadingMessage();
+
+    let btnEnviar = document.getElementById('btnEnviar') as HTMLButtonElement;
+    if (!btnEnviar) { return; }
+    btnEnviar.innerHTML = isLoading ? '<img src="/imagens/loading/infinity2.svg" alt="" width="100">' : 'Enviar';
+  }
 
 }

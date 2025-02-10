@@ -19,4 +19,5 @@ export enum TipoMensagem {
 export interface ChatItemMessage {
     is_ollama: boolean;
     mensagem: string;
+    is_loading?: boolean;
 }

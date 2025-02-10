@@ -94,7 +94,7 @@ npm i prismjs
 - [x] Implementar o chat inicial
 - [x] Consular a Api do Ollama
 - [x] Formatar o markdown de retorno
-- [ ] Melhorar as mensagens
+- [x] Melhorar as mensagens
 - [x] Adicionar os estilos para as seções de código (resposta Ollama)
 - [ ] Explorar a Api de consulta para o Ollama
 - [ ] Adicionar botão para copiar o código
