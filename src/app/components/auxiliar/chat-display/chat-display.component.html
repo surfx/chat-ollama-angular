@@ -9,7 +9,7 @@
         </div>
         <div class="chat-resposta">
             @if(!mensagem.is_loading){
-                <markdown lineNumbers [data]="mensagem.mensagem"></markdown>
+                <markdown lineNumbers clipboard [data]="mensagem.mensagem"></markdown>
             } @else {
                 <div class="chat_loading_llama" [innerHTML]="mensagem.mensagem"></div>
             }

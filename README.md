@@ -87,6 +87,7 @@ npm i --save-dev @types/showdown
 npm i -g json-server
 npm i ngx-markdown
 npm i prismjs
+npm i clipboard@^2.0.11 --save
 ```
 
 ## 📄 TODO
@@ -97,7 +98,7 @@ npm i prismjs
 - [x] Melhorar as mensagens
 - [x] Adicionar os estilos para as seções de código (resposta Ollama)
 - [ ] Explorar a Api de consulta para o Ollama
-- [ ] Adicionar botão para copiar o código
+- [x] Adicionar botão para copiar o código
 
 # 🔗 Referências
 

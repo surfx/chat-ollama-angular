@@ -108,7 +108,6 @@ export class ChatOllamaPageComponent {
         this.userPrompt, this.selectedModel, temperatura, false).subscribe({
           next: (res) => {
             this.sendOllamaResponse(res);
-            //this.addBtnCopiarCodigo(res);
           },
           error: (err) => {
             this.sendOllamaResponse(err);
@@ -207,48 +206,7 @@ export class ChatOllamaPageComponent {
     <p>O método principal chama este método e exibe tanto a string original quanto a string limpa resultante.</p>
     `;
 
-    //this.addBtnCopiarCodigo(resposta);
     this.sendOllamaResponse(resposta);
-  }
-
-  // private addBtnCopiarCodigo(resposta: string): void {
-  //   if (!resposta) return;
-  //   const { mensagem, idCounter } = this.addBtnCopiarCodigoRegex(resposta);
-  //   if (idCounter <= 0) { this.updateResponse(mensagem); return; }
-  //   this.updateResponse(mensagem);
-  //   for (let i = 0; i < idCounter; i++) {
-  //     const button = document.getElementById(`btnCopiar-${i}`) as HTMLButtonElement;
-  //     const contexto = this;
-  //     !!button && button.addEventListener('click', () => this.copyToClipboard(`llama-code-${i}`, contexto));
-  //   }
-  // }
-
-  // private addBtnCopiarCodigoRegex(mensagem: string): { mensagem: string, idCounter: number } {
-  //   let idCounter = 0;
-  //   const preCodeRegex = /<pre><code class="([\w-]+) language-([\w-]+)">/g;
-  //   let match;
-
-  //   while ((match = preCodeRegex.exec(mensagem)) !== null) {
-  //     const startIndex = match.index;
-  //     const endIndex = mensagem.indexOf('</code>', startIndex);
-  //     if (endIndex !== -1) {
-  //       mensagem = mensagem.slice(0, startIndex) + `<br /><pre><code class="${match[1]} language-${match[2]}" id="llama-code-${idCounter}">    ` + mensagem.slice(startIndex + match[0].length, endIndex) + `</code><button class="copy-button" id="btnCopiar-${idCounter}">Copiar</button></pre><br />` + mensagem.slice(endIndex + 7);
-  //       idCounter++;
-  //     }
-  //   }
-  //   return { mensagem, idCounter };
-  // }
-
-  public copyToClipboard(codeId: string, contexto: any) {
-    const codeElement = document.getElementById(codeId) as HTMLElement;
-    const text = codeElement!.textContent;
-    if (!text) { return; }
-    navigator.clipboard.writeText(text).then(function () {
-      contexto.mensagensOverlayComponent?.show('Código copiado', TipoMensagem.SUCESSO, 500);
-    }, function (err) {
-      contexto.mensagensOverlayComponent?.show('Erro ao copiar código', TipoMensagem.ERRO, 700);
-      console.error('Erro ao copiar código: ', err);
-    });
   }
 
   private loadingChat(isLoading: boolean = true) {
