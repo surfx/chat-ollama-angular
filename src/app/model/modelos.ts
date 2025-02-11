@@ -1,3 +1,5 @@
+import { Message } from "ollama";
+
 export interface Configuracoes {
     id: string;
     ollama_api: string;
@@ -16,8 +18,19 @@ export enum TipoMensagem {
     NEUTRO = 'neutro'
 }
 
-export interface ChatItemMessage {
-    is_ollama: boolean;
-    mensagem: string;
-    is_loading?: boolean;
+
+//#region chat ollama
+export interface UnifiedChatResponse {
+    model: string;
+    created_at: Date;
+    message: Message;
+    done: boolean;
+    done_reason: string;
+    total_duration: number;
+    load_duration: number;
+    prompt_eval_count: number;
+    prompt_eval_duration: number;
+    eval_count: number;
+    eval_duration: number;
 }
+//#endregion

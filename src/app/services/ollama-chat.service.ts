@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { Ollama, ModelResponse } from 'ollama';
+import { Ollama, ModelResponse, Message, ChatResponse, GenerateResponse } from 'ollama';
 import { Observable } from 'rxjs';
-import * as Showdown from 'showdown';
+//import * as Showdown from 'showdown';
 
 @Injectable({
   providedIn: 'root'
@@ -12,7 +12,7 @@ export class OllamaChatService {
   // ex: http://192.168.0.2:11434/api/tags
 
   //private showdown  = require('showdown');
-  private converter = new Showdown.Converter();
+  //private converter = new Showdown.Converter();
   private ollama = new Ollama({ host: 'http://192.168.0.2:11434' });
 
   public setHost(host: string) {
@@ -24,10 +24,9 @@ export class OllamaChatService {
     userPrompt: string,
     modelo = 'deepseek-v2:16b',
     temperatura: number = 0.7,
-    history: { role: 'user' | 'assistant', content: string }[],
-    converterMarkdown: boolean = true
-  ): Observable<string> {
-    return new Observable<string>((observer) => {
+    history: Message[] = []
+  ): Observable<ChatResponse> {
+    return new Observable<ChatResponse>((observer) => {
 
       const streamResponse = this.ollama.chat({
         model: modelo,
@@ -40,14 +39,11 @@ export class OllamaChatService {
 
       (async () => {
         try {
-          let fullResponse = '';
           for await (const chunk of await streamResponse) {
-            if (chunk.message && chunk.message.content) {
-              fullResponse += chunk.message.content;
+            if (chunk) {
+              observer.next(chunk);
             }
           }
-          const rt = !converterMarkdown ? fullResponse : this.converter.makeHtml(fullResponse);
-          observer.next(rt);
           observer.complete();
         } catch (error) {
           observer.error(error);
@@ -55,6 +51,39 @@ export class OllamaChatService {
       })();
     });
   }
+
+  //#region generate
+  public generateOllama(
+    userPrompt: string,
+    modelo = 'deepseek-v2:16b',
+    temperatura: number = 0.7
+  ): Observable<GenerateResponse> {
+    return new Observable<GenerateResponse>((observer) => {
+
+      const streamResponse = this.ollama.generate({
+        model: modelo,
+        prompt: userPrompt,
+        stream: true,
+        options: {
+          temperature: temperatura
+        }
+      });
+
+      (async () => {
+        try {
+          for await (const chunk of await streamResponse) {
+            if (chunk) {
+              observer.next(chunk);
+            }
+          }
+          observer.complete();
+        } catch (error) {
+          observer.error(error);
+        }
+      })();
+    });
+  }
+  //#endregion
 
   public listaModelos(): Observable<ModelResponse[]> {
     return new Observable<ModelResponse[]>((observer) => {
@@ -74,6 +103,8 @@ export class OllamaChatService {
   }
 
 }
+
+// this.converter.makeHtml(fullResponse)
 
 /*
 curl http://192.168.0.36:11434/api/generate -d '{

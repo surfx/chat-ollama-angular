@@ -1,18 +1,30 @@
 @for (mensagem of mensagens; track $index) {
     <div class="chat-container">
         <div class="chat-profile-pic" id="chat-profile-pic-{{$index}}">
-            @if(mensagem.is_ollama){
+            @if(mensagem.message.role === 'assistant'){
                 <img src="/imagens/ollama.png" alt="Perfil" />
             } @else {
                 <i class="fa-solid fa-user"></i>
             }
         </div>
         <div class="chat-resposta">
-            @if(!mensagem.is_loading){
-                <markdown lineNumbers clipboard [data]="mensagem.mensagem"></markdown>
+            <markdown lineNumbers clipboard [data]="mensagem.message.content"></markdown>
+            <!-- @if(!mensagem.is_loading){
+                <markdown lineNumbers clipboard [data]="mensagem.message.content"></markdown>
             } @else {
-                <div class="chat_loading_llama" [innerHTML]="mensagem.mensagem"></div>
-            }
+                <div class="chat_loading_llama" [innerHTML]="mensagem.message.content"></div>
+            } -->
+        </div>
+    </div>
+}
+
+@if(is_loading()){
+    <div class="chat-container">
+        <div class="chat-profile-pic" id="chat-profile-pic-loading">
+            <img src="/imagens/ollama.png" alt="Perfil" />
+        </div>
+        <div class="chat-resposta">
+            <div class="chat_loading_llama" [innerHTML]="loading_message()"></div>
         </div>
     </div>
 }

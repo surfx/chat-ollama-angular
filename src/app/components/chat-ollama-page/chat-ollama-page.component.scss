@@ -66,24 +66,30 @@
     flex-direction: column;
 
 
-    .model-select {
-        height: 75px;
-        display: flex;
+    .model-config {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
         align-items: center;
-        justify-content: space-between;
+        height: 50px;
         gap: 10px;
 
         select {
             padding: 10px;
-            width: 330px;
-            margin-right: 100px;
         }
 
-        div {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
+        .config-server-status {
+            font-size: 0.9rem;
+
+            .server-online {
+                color: #168821;
+            }
+            .server-offline {
+                color: #e52207;
+            }
+        }
+
+        .config-temperature {
+            justify-self: end;
         }
 
     }

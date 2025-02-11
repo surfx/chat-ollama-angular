@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, ViewChild, ViewEncapsulation } from '@angular/core';
+import { Component, signal, ViewChild, ViewEncapsulation } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ModelResponse } from 'ollama';
+import { ChatResponse, ModelResponse } from 'ollama';
 import { delay } from 'rxjs';
 import { Configuracoes, TipoMensagem } from '../../model/modelos';
 import { ConfiguracoesService } from '../../services/configuracoes.service';
@@ -38,6 +38,7 @@ export class ChatOllamaPageComponent {
   protected selectedModel: string = '';
   protected userPrompt: string = '';
   protected modelos: ModelResponse[] | undefined;
+  protected isServerOnline = signal(false);
 
 
   constructor(private configuracoesService: ConfiguracoesService, private ollamaChatService: OllamaChatService) {
@@ -50,8 +51,9 @@ export class ChatOllamaPageComponent {
       next: (res) => {
         this.modelos = res;
         this.selectedModel = (!!res && res.length > 0) ? res[0].name : '';
+        this.isServerOnline.set(true);
       },
-      error: (err) => console.error(err),
+      error: (err) => { console.error(err); this.isServerOnline.set(false); },
       complete: () => { }
     });
 
@@ -78,7 +80,7 @@ export class ChatOllamaPageComponent {
 
   btnAbortarMensagem() {
     this.ollamaChatService.abortar();
-    this.updateChat('Análise abortada', true);
+    this.updateChatTxt('Análise abortada', true);
     this.loadingChat(false);
     this.toggleForm(false);
   }
@@ -94,25 +96,33 @@ export class ChatOllamaPageComponent {
       if (!temperatura || temperatura < 0) { temperatura = 0.7; this.configuracoes.configuracoes!.temperatura = temperatura; }
 
       this.toggleForm(true);
-      this.updateChat(this.userPrompt, false);
+      this.updateChatTxt(this.userPrompt);
       this.loadingChat();
 
+      let index = -1;
+
       this.ollamaChatService.chatOllama(
-        this.userPrompt, this.selectedModel, temperatura, this.appchatdisplay?.getHistorico() ?? [], false).subscribe({
-          next: (res) => {
-            this.updateChat(res, true);
-          },
-          error: (err) => {
-            this.updateChat(err, true);
-            this.mensagemComponente?.show('Erro na comunicação com o Ollama', TipoMensagem.ERRO, 700);
-            this.scrollMsgAppMensagem();
-          },
-          complete: () => {
-            this.mensagensOverlayComponent?.hide();
-            this.loadingChat(false);
-            this.toggleForm(false);
+        this.userPrompt, this.selectedModel, temperatura, this.appchatdisplay?.getHistorico() ?? []
+      ).subscribe({
+        next: (res) => {
+          if (index < 0) {
+            index = this.updateChat(res);
+          } else {
+            this.updateChatMessage(index, res);
           }
-        });
+        },
+        error: (err) => {
+          this.updateChatTxt(err, true);
+          this.mensagemComponente?.show('Erro na comunicação com o Ollama', TipoMensagem.ERRO, 700);
+          this.scrollMsgAppMensagem();
+        },
+        complete: () => {
+          this.mensagensOverlayComponent?.hide();
+          this.appchatdisplay?.scrollToLastMessage();
+          this.loadingChat(false);
+          this.toggleForm(false);
+        }
+      });
     } else {
       this.loadingChat();
       setTimeout(() => {
@@ -124,21 +134,34 @@ export class ChatOllamaPageComponent {
   }
   //#endregion
 
-  private updateChat(response: string, is_ollama: boolean = false) {
-    this.appchatdisplay?.adicionarMensagem({
-      is_ollama: is_ollama,
-      mensagem: response
-    });
-    if (!is_ollama) {
+  private updateChatTxt(response: string, is_ollama: boolean = false): number {
+    let add: Partial<ChatResponse> = {
+      done: true,
+      message: {
+        role: is_ollama ? 'assistant' : 'user',
+        content: response
+      }
+    };
+    return this.updateChat(add);
+  }
+
+  private updateChat(response: Partial<ChatResponse>): number {
+    let index = this.appchatdisplay?.adicionarMensagemCH(response);
+    if (response.message?.role === 'user') {
       let txtUserPrompt = document.getElementById('txtUserPrompt') as HTMLInputElement;
       !!txtUserPrompt && txtUserPrompt.focus();
     } else {
       this.userPrompt = '';
     }
+    return index ?? -1;
+  }
+
+  public updateChatMessage(index: number, response: ChatResponse): void {
+    this.appchatdisplay?.updateMessage(index, response);
   }
 
   private testeResposta() {
-    this.updateChat('Testando');
+    this.updateChatTxt('Testando');
 
     const resposta = `
     <p>Aqui está um exemplo simples em Java para criar uma classe que remove todos os caracteres que não são 'A' ou 'B':</p>
@@ -188,7 +211,7 @@ export class ChatOllamaPageComponent {
     <p>O método principal chama este método e exibe tanto a string original quanto a string limpa resultante.</p>
     `;
 
-    this.updateChat(resposta, true);
+    this.updateChatTxt(resposta, true);
   }
 
   private toggleForm(desabilitar: boolean = true) {

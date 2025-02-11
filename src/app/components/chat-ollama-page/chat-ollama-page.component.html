@@ -10,7 +10,7 @@
         <div>
             <label for="config_ollama_api">Api Ollama</label>
             <input type="text" id="config_ollama_api" [(ngModel)]="configuracoes!.ollama_api" />
-            <button (click)="btnSalvarConfiguracoes()">Salvar</button>
+            <button (click)="btnSalvarConfiguracoes()" [disabled]="!isServerOnline()">Salvar</button>
         </div>
 
     </header>
@@ -22,8 +22,8 @@
     </main>
     <footer class="footer">
         
-        <div class="model-select">
-            <select [(ngModel)]="selectedModel" id="selModelos">
+        <div class="model-config">
+            <select [(ngModel)]="selectedModel" id="selModelos" [disabled]="!isServerOnline()">
                 @if (!modelos || modelos.length <= 0) {
                     <option value="loading">Loading models...</option>
                 } @else {
@@ -32,19 +32,30 @@
                     }
                 }
             </select>
-            <div>
+            <div class="config-server-status">
+                @if(!isServerOnline()) {
+                    <p class="server-offline">
+                        <i class="fa-solid fa-xmark"></i> Servidor Offline
+                    </p>
+                } @else {
+                    <p class="server-online">
+                        <i class="fa-solid fa-check"></i> Servidor Online
+                    </p>
+                }
+            </div>
+            <div class="config-temperature">
                 <label for="temperature">Temperatura</label>
-                <input type="range" id="temperature" min="0" max="2" step="0.1" [(ngModel)]="configuracoes.configuracoes!.temperatura"> {{configuracoes.configuracoes!.temperatura}}
+                <input type="range" id="temperature" min="0" max="2" step="0.1" [(ngModel)]="configuracoes.configuracoes!.temperatura" [disabled]="!isServerOnline()"> {{configuracoes.configuracoes!.temperatura}}
             </div>
         </div>
         <div class="input-section">
-            <textarea placeholder="Digite sua mensagem..." [(ngModel)]="userPrompt" id="txtUserPrompt"></textarea>
+            <textarea placeholder="Digite sua mensagem..." [(ngModel)]="userPrompt" id="txtUserPrompt" [disabled]="!isServerOnline()"></textarea>
             <div class="btns_limpar_abortar">
                 <button (click)="btnLimparMensagem()" id="btnLimpar">Limpar</button>
                 <button (click)="btnAbortarMensagem()" id="btnAbortar">Abortar</button>
             </div>
             
-            <button (click)="btnEnviarMensagem()" id="btnEnviar">Enviar</button>
+            <button (click)="btnEnviarMensagem()" id="btnEnviar" [disabled]="!isServerOnline()">Enviar</button>
         </div>
 
     </footer>
