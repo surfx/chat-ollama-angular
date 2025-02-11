@@ -24,12 +24,14 @@ export class OllamaChatService {
     userPrompt: string,
     modelo = 'deepseek-v2:16b',
     temperatura: number = 0.7,
+    history: { role: 'user' | 'assistant', content: string }[],
     converterMarkdown: boolean = true
   ): Observable<string> {
     return new Observable<string>((observer) => {
+
       const streamResponse = this.ollama.chat({
         model: modelo,
-        messages: [{ role: 'user', content: userPrompt }],
+        messages: [...history, { role: 'user', content: userPrompt }],
         stream: true,
         options: {
           temperature: temperatura

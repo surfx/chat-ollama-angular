@@ -30,15 +30,21 @@ Projeto angular de chat com o [ollama](https://ollama.com/)
 
 ## 🚀 Angular
 
-`npm start` ou `./run.sh`
+`./run.sh`
 
 - [http://localhost:4200/](http://localhost:4200/)
 
 ## 🪄 Json server
 
-`./server.sh`
+```bash
+#!/bin/bash
+cd /home/serpro/estudos/chat-ollama-angular/
+json-server --watch src/db/db.json
+```
 
 - [http://localhost:3000/](http://localhost:3000/)
+
+*Obs:* `./run.sh` já executa o projeto angular e o json server.
 
 ## 🦙 Ollama
 

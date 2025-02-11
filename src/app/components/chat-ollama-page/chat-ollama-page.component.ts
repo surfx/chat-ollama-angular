@@ -80,51 +80,30 @@ export class ChatOllamaPageComponent {
     const test = false;
 
     if (!test) {
-      let txtUserPrompt = document.getElementById('txtUserPrompt') as HTMLInputElement;
-      let selModelos = document.getElementById('selModelos') as HTMLSelectElement;
-      let btnLimpar = document.getElementById('btnLimpar') as HTMLButtonElement;
-      let btnEnviar = document.getElementById('btnEnviar') as HTMLButtonElement;
-      let temperature = document.getElementById('temperature') as HTMLInputElement;
-
-      if (!this.userPrompt || this.userPrompt.trim().length <= 0) { this.mensagemComponente?.show('Informe a mensagem', TipoMensagem.ALERTA, 700); return; }
-      if (!this.selectedModel || this.selectedModel.trim().length <= 0) { this.mensagemComponente?.show('Selecione o modelo', TipoMensagem.ALERTA, 700); return; }
+      if (!this.userPrompt || this.userPrompt.trim().length <= 0) { this.mensagemComponente?.show('Informe a mensagem', TipoMensagem.ALERTA, 700); this.scrollMsgAppMensagem(); return; }
+      if (!this.selectedModel || this.selectedModel.trim().length <= 0) { this.mensagemComponente?.show('Selecione o modelo', TipoMensagem.ALERTA, 700); this.scrollMsgAppMensagem(); return; }
 
       let temperatura = this.configuracoes.configuracoes!.temperatura;
       if (!temperatura || temperatura < 0) { temperatura = 0.7; this.configuracoes.configuracoes!.temperatura = temperatura; }
 
-      this.sendUserPrompt(this.userPrompt);
-
-      if (!!txtUserPrompt) {
-        txtUserPrompt.focus();
-        txtUserPrompt.disabled = true;
-      }
-      if (!!selModelos) { selModelos.disabled = true; }
-      if (!!btnLimpar) { btnLimpar.disabled = true; }
-      if (!!btnEnviar) { btnEnviar.disabled = true; }
-      if (!!temperature) { temperature.disabled = true; }
-
+      this.toggleForm(true);
+      this.updateChat(this.userPrompt, false);
       this.loadingChat();
+
       this.ollamaChatService.chatOllama(
-        this.userPrompt, this.selectedModel, temperatura, false).subscribe({
+        this.userPrompt, this.selectedModel, temperatura, this.appchatdisplay?.getHistorico() ?? [], false).subscribe({
           next: (res) => {
-            this.sendOllamaResponse(res);
+            this.updateChat(res, true);
           },
           error: (err) => {
-            this.sendOllamaResponse(err);
+            this.updateChat(err, true);
             this.mensagemComponente?.show('Erro na comunicação com o Ollama', TipoMensagem.ERRO, 700);
+            this.scrollMsgAppMensagem();
           },
           complete: () => {
             this.mensagensOverlayComponent?.hide();
             this.loadingChat(false);
-            if (!!txtUserPrompt) {
-              txtUserPrompt.disabled = false;
-              txtUserPrompt.focus();
-              //this.userPrompt = '';
-            }
-            if (!!selModelos) { selModelos.disabled = false; }
-            if (!!btnLimpar) { btnLimpar.disabled = false; }
-            if (!!btnEnviar) { btnEnviar.disabled = false; }
-            if (!!temperature) { temperature.disabled = false; }
+            this.toggleForm(false);
           }
         });
     } else {
@@ -138,25 +117,21 @@ export class ChatOllamaPageComponent {
   }
   //#endregion
 
-  private sendUserPrompt(userPrompt: string) {
+  private updateChat(response: string, is_ollama: boolean = false) {
     this.appchatdisplay?.adicionarMensagem({
-      is_ollama: false,
-      mensagem: userPrompt
-    });
-    let txtUserPrompt = document.getElementById('txtUserPrompt') as HTMLInputElement;
-    !!txtUserPrompt && txtUserPrompt.focus();
-  }
-
-  private sendOllamaResponse(response: string) {
-    this.appchatdisplay?.adicionarMensagem({
-      is_ollama: true,
+      is_ollama: is_ollama,
       mensagem: response
     });
-    this.userPrompt = '';
+    if (!is_ollama) {
+      let txtUserPrompt = document.getElementById('txtUserPrompt') as HTMLInputElement;
+      !!txtUserPrompt && txtUserPrompt.focus();
+    } else {
+      this.userPrompt = '';
+    }
   }
 
   private testeResposta() {
-    this.sendUserPrompt('Testando');
+    this.updateChat('Testando');
 
     const resposta = `
     <p>Aqui está um exemplo simples em Java para criar uma classe que remove todos os caracteres que não são 'A' ou 'B':</p>
@@ -206,7 +181,31 @@ export class ChatOllamaPageComponent {
     <p>O método principal chama este método e exibe tanto a string original quanto a string limpa resultante.</p>
     `;
 
-    this.sendOllamaResponse(resposta);
+    this.updateChat(resposta, true);
+  }
+
+  private toggleForm(desabilitar: boolean = true) {
+    let txtUserPrompt = document.getElementById('txtUserPrompt') as HTMLInputElement;
+    let selModelos = document.getElementById('selModelos') as HTMLSelectElement;
+    let btnLimpar = document.getElementById('btnLimpar') as HTMLButtonElement;
+    let btnEnviar = document.getElementById('btnEnviar') as HTMLButtonElement;
+    let temperature = document.getElementById('temperature') as HTMLInputElement;
+
+    if (!!txtUserPrompt) {
+      txtUserPrompt.focus();
+      txtUserPrompt.disabled = desabilitar;
+    }
+    if (!!selModelos) { selModelos.disabled = desabilitar; }
+    if (!!btnLimpar) { btnLimpar.disabled = desabilitar; }
+    if (!!btnEnviar) { btnEnviar.disabled = desabilitar; }
+    if (!!temperature) { temperature.disabled = desabilitar; }
+
+  }
+
+  private scrollMsgAppMensagem(timeout = 35) {
+    let scroolto = () => { window.document.getElementById('msg_app_mensagem')?.scrollIntoView({ behavior: 'smooth' }); };
+    if (timeout <= 0) { scroolto(); return; }
+    setTimeout(() => scroolto(), timeout);
   }
 
   private loadingChat(isLoading: boolean = true) {

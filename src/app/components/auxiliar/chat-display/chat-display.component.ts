@@ -18,6 +18,8 @@ export class ChatDisplayComponent {
 
     }
 
+    public getMensagens(): ChatItemMessage[] { return this.mensagens; }
+
     public adicionarMensagem(mensagem: Partial<ChatItemMessage>) {
         let add: ChatItemMessage = {
             is_ollama: mensagem.is_ollama || false,
@@ -44,12 +46,16 @@ export class ChatDisplayComponent {
         this.mensagens = this.mensagens.filter(m => !m.is_loading);
     }
 
+    public getHistorico(): { role: 'user' | 'assistant', content: string }[] {
+        return this.getMensagens()?.map(x => ({ role: x.is_ollama ? 'assistant' : 'user', content: x.mensagem })) ?? [];
+    }
+
     private scrollToLastMessage() {
         if (!this.mensagens || this.mensagens.length <= 0) return;
         setTimeout(() => {
-            window.document.getElementById(`chat-profile-pic-${this.mensagens.length-1}`)?.scrollIntoView({ behavior: 'smooth' });
+            window.document.getElementById(`chat-profile-pic-${this.mensagens.length - 1}`)?.scrollIntoView({ behavior: 'smooth' });
         }, 200);
-    }  
+    }
 
     // private randomString(length: number): string {
     //     const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
