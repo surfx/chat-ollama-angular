@@ -1,8 +1,10 @@
 .chat-container {
-    display: flex;
+    display: grid;
+    grid-template-columns: 50px 1fr;
     justify-content: space-between;
     align-items: flex-start;
     margin: 5px 25px 25px 25px;
+    max-width: 98%;
 
     .chat-resposta {
         flex: 1;
