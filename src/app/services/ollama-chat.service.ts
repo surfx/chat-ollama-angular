@@ -69,6 +69,10 @@ export class OllamaChatService {
     });
   }
 
+  public abortar(): void {
+    this.ollama.abort();
+  }
+
 }
 
 /*

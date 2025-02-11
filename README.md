@@ -105,7 +105,7 @@ npm i clipboard@^2.0.11 --save
 - [x] Adicionar os estilos para as seções de código (resposta Ollama)
 - [ ] Explorar a Api de consulta para o Ollama
 - [x] Adicionar botão para copiar o código
-- [ ] Implementar `ollama.abort()`
+- [x] Implementar `ollama.abort()`
 
 # 🔗 Referências
 

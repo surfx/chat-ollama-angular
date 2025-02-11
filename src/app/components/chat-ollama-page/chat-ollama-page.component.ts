@@ -76,6 +76,13 @@ export class ChatOllamaPageComponent {
     this.appchatdisplay?.limparMensagens();
   }
 
+  btnAbortarMensagem() {
+    this.ollamaChatService.abortar();
+    this.updateChat('Análise abortada', true);
+    this.loadingChat(false);
+    this.toggleForm(false);
+  }
+
   btnEnviarMensagem() {
     const test = false;
 

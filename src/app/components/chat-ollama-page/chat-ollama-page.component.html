@@ -39,7 +39,11 @@
         </div>
         <div class="input-section">
             <textarea placeholder="Digite sua mensagem..." [(ngModel)]="userPrompt" id="txtUserPrompt"></textarea>
-            <button (click)="btnLimparMensagem()" id="btnLimpar">Limpar</button>
+            <div class="btns_limpar_abortar">
+                <button (click)="btnLimparMensagem()" id="btnLimpar">Limpar</button>
+                <button (click)="btnAbortarMensagem()" id="btnAbortar">Abortar</button>
+            </div>
+            
             <button (click)="btnEnviarMensagem()" id="btnEnviar">Enviar</button>
         </div>
 
