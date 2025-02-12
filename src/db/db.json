@@ -4,7 +4,8 @@
       "id": "1",
       "ollama_api": "http://192.168.0.2:11434",
       "configuracoes": {
-        "temperatura": 0.7
+        "temperatura": 0.7,
+        "modo": "generate"
       }
     }
   ]

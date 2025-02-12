@@ -1,9 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component, signal, ViewChild, ViewEncapsulation } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ChatResponse, ModelResponse } from 'ollama';
+import { ChatResponse, GenerateResponse, ModelResponse } from 'ollama';
 import { delay } from 'rxjs';
-import { Configuracoes, TipoMensagem } from '../../model/modelos';
+import { Configuracoes, TipoMensagem, UnifiedChatResponse } from '../../model/modelos';
 import { ConfiguracoesService } from '../../services/configuracoes.service';
 import { OllamaChatService } from '../../services/ollama-chat.service';
 import { ChatDisplayComponent } from '../auxiliar/chat-display/chat-display.component';
@@ -31,7 +31,8 @@ export class ChatOllamaPageComponent {
 
   public configuracoes: Partial<Configuracoes> = {
     configuracoes: {
-      temperatura: 0.7
+      temperatura: 0.7,
+      modo: 'chat'
     }
   };
   private readonly defaultId = 1;
@@ -101,7 +102,8 @@ export class ChatOllamaPageComponent {
 
       let index = -1;
 
-      this.ollamaChatService.chatOllama(
+      this.ollamaChatService.consultaOllama(
+        this.configuracoes.configuracoes?.modo,
         this.userPrompt, this.selectedModel, temperatura, this.appchatdisplay?.getHistorico() ?? []
       ).subscribe({
         next: (res) => {
@@ -135,7 +137,7 @@ export class ChatOllamaPageComponent {
   //#endregion
 
   private updateChatTxt(response: string, is_ollama: boolean = false): number {
-    let add: Partial<ChatResponse> = {
+    let add: Partial<UnifiedChatResponse> = {
       done: true,
       message: {
         role: is_ollama ? 'assistant' : 'user',
@@ -145,8 +147,8 @@ export class ChatOllamaPageComponent {
     return this.updateChat(add);
   }
 
-  private updateChat(response: Partial<ChatResponse>): number {
-    let index = this.appchatdisplay?.adicionarMensagemCH(response);
+  private updateChat(response: Partial<UnifiedChatResponse>): number {
+    let index = this.appchatdisplay?.adicionarMensagem(response);
     if (response.message?.role === 'user') {
       let txtUserPrompt = document.getElementById('txtUserPrompt') as HTMLInputElement;
       !!txtUserPrompt && txtUserPrompt.focus();
@@ -156,7 +158,7 @@ export class ChatOllamaPageComponent {
     return index ?? -1;
   }
 
-  public updateChatMessage(index: number, response: ChatResponse): void {
+  public updateChatMessage(index: number, response: UnifiedChatResponse): void {
     this.appchatdisplay?.updateMessage(index, response);
   }
 

@@ -1,9 +1,8 @@
 import { Component, ViewChild } from '@angular/core';
-import { ChatResponse, GenerateResponse } from 'ollama';
 import { delay } from 'rxjs';
-import { UnifiedChatResponse } from '../../model/modelos';
 import { OllamaChatService } from '../../services/ollama-chat.service';
 import { ChatDisplayComponent } from '../auxiliar/chat-display/chat-display.component';
+import { GenerateRequest } from 'ollama';
 
 
 @Component({
@@ -20,44 +19,7 @@ export class TestesComponent {
 
     }
 
-    createUnifiedResponseFromGenerateResponse(generateResponse: GenerateResponse): UnifiedChatResponse {
-        return {
-            model: generateResponse.model,
-            created_at: generateResponse.created_at,
-            message: {
-                role: 'assistant',
-                content: generateResponse.response,
-            },
-            done: generateResponse.done,
-            done_reason: generateResponse.done_reason,
-            total_duration: generateResponse.total_duration,
-            load_duration: generateResponse.load_duration,
-            prompt_eval_count: generateResponse.prompt_eval_count,
-            prompt_eval_duration: generateResponse.prompt_eval_duration,
-            eval_count: generateResponse.eval_count,
-            eval_duration: generateResponse.eval_duration,
-        };
-    }
-
-    createUnifiedResponseFromChat(chatResponse: ChatResponse): UnifiedChatResponse {
-        return {
-            model: chatResponse.model,
-            created_at: chatResponse.created_at,
-            message: chatResponse.message,
-            done: chatResponse.done,
-            done_reason: chatResponse.done_reason,
-            total_duration: chatResponse.total_duration,
-            load_duration: chatResponse.load_duration,
-            prompt_eval_count: chatResponse.prompt_eval_count,
-            prompt_eval_duration: chatResponse.prompt_eval_duration,
-            eval_count: chatResponse.eval_count,
-            eval_duration: chatResponse.eval_duration,
-        };
-    }
-
-
     btnTeste1() {
-
         let prompt = `
         Crie uma classe Java para o jogo tic tac toe
         `;
@@ -68,20 +30,16 @@ export class TestesComponent {
 
         let index: number | undefined = -1;
 
-        this.ollamaChatService.generateOllama(prompt, 'deepseek-v2:16b', 0.7)
+        this.ollamaChatService.consultaOllama('chat', prompt, 'deepseek-v2:16b', 0.7, [], [])
             .pipe(delay(1000))
             .subscribe({
                 next: (res) => {
-
-                    let aux: UnifiedChatResponse = this.createUnifiedResponseFromGenerateResponse(res);
-
                     if (!index || index < 0) {
-                        index = this.appchatdisplay?.adicionarMensagem(aux);
+                        index = this.appchatdisplay?.adicionarMensagem(res);
                         return;
                     } else {
-                        this.appchatdisplay?.updateMessage(index, aux);
+                        this.appchatdisplay?.updateMessage(index, res);
                     }
-
                 },
                 error: (err) => console.error(err),
                 complete: () => { this.appchatdisplay?.removeLoadingMessage(); }
@@ -91,35 +49,74 @@ export class TestesComponent {
 
     btnTeste2() {
 
-        let prompt = `
-        Crie uma classe Java para o jogo tic tac toe
-        `;
+    }
 
-        prompt = 'quanto é 1 + 1 ?';
+    //--------------------
+    images: string[] = [];
 
+    onFileSelected(event: any): void {
+        const files: FileList = event.target.files;
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const reader = new FileReader();
+
+            reader.onload = (e: any) => {
+                const arrayBuffer = e.target.result;
+                const uint8Array = new Uint8Array(arrayBuffer);
+                const base64String = this.arrayBufferToBase64(uint8Array);
+
+                // Adiciona Base64 string ao array de imagens
+                this.images.push(base64String);
+            };
+
+            reader.readAsArrayBuffer(file);
+        }
+    }
+
+    // Converte Uint8Array para Base64 string
+    arrayBufferToBase64(buffer: Uint8Array): string {
+        let binary = '';
+        const bytes = new Uint8Array(buffer);
+        const len = bytes.byteLength;
+        for (let i = 0; i < len; i++) {
+            binary += String.fromCharCode(bytes[i]);
+        }
+        return window.btoa(binary);
+    }
+
+    onEnviar(): void {
+        const requestData: GenerateRequest = {
+            model: 'deepseek-r1:7b',
+            prompt: 'Sabe me dizer qual é o nome da atriz da imagem ?',
+            images: this.images ?? []
+        };
+
+        this.generateRequest(requestData);
+    }
+
+    generateRequest(data: GenerateRequest): void {
+        // Lógica para processar a solicitação
+        console.log(data);
 
         this.appchatdisplay?.loadingMessage();
 
         let index: number | undefined = -1;
 
-        this.ollamaChatService.chatOllama('quanto é 1 + 1 ?', 'deepseek-v2:16b', 0.7)
+        this.ollamaChatService.consultaOllama('generate', data.prompt, data.model, 0.7, [], data.images)
             .pipe(delay(1000))
             .subscribe({
                 next: (res) => {
-                    let aux: UnifiedChatResponse = this.createUnifiedResponseFromChat(res);
                     if (!index || index < 0) {
-                        index = this.appchatdisplay?.adicionarMensagem(aux);
+                        index = this.appchatdisplay?.adicionarMensagem(res);
                         return;
                     } else {
-                        this.appchatdisplay?.updateMessage(index, aux);
+                        this.appchatdisplay?.updateMessage(index, res);
                     }
                 },
                 error: (err) => console.error(err),
-                complete: () => {
-                    this.appchatdisplay?.removeLoadingMessage();
-                }
+                complete: () => { this.appchatdisplay?.removeLoadingMessage(); }
             });
-    }
 
+    }
 
 }

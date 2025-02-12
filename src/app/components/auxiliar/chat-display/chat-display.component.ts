@@ -1,6 +1,6 @@
 import { Component, Input, signal } from '@angular/core';
 import { MarkdownModule } from 'ngx-markdown';
-import { ChatResponse, GenerateResponse, Message } from 'ollama';
+import { Message } from 'ollama';
 import { UnifiedChatResponse } from '../../../model/modelos';
 
 @Component({
@@ -23,14 +23,6 @@ export class ChatDisplayComponent {
     }
 
     public getMensagens(): UnifiedChatResponse[] { return this.mensagens; }
-
-    public adicionarMensagemGR(chatitem: Partial<GenerateResponse>): number {
-        return this.adicionarMensagem(this.toUnifiedChatResponseFromGenerateResponse(chatitem));
-    }
-
-    public adicionarMensagemCH(chatitem: Partial<ChatResponse>): number {
-        return this.adicionarMensagem(this.toUnifiedChatResponseFromChat(chatitem));
-    }
 
     public adicionarMensagem(chatitem: Partial<UnifiedChatResponse>): number {
         if (!chatitem || !chatitem.message || !chatitem.message?.content) { return -1; }
@@ -71,44 +63,6 @@ export class ChatDisplayComponent {
             window.document.getElementById(`chat-profile-pic-${this.mensagens.length - 1}`)?.scrollIntoView({ behavior: 'smooth' });
         }, 200);
     }
-
-
-    //#region conversor
-    private toUnifiedChatResponseFromGenerateResponse(generateResponse: Partial<GenerateResponse>): UnifiedChatResponse {
-        return {
-            model: generateResponse.model || '',
-            created_at: generateResponse.created_at || new Date(),
-            message: {
-                role: 'assistant',
-                content: generateResponse.response || '',
-            },
-            done: generateResponse.done || false,
-            done_reason: generateResponse.done_reason || '',
-            total_duration: generateResponse.total_duration || 0,
-            load_duration: generateResponse.load_duration || 0,
-            prompt_eval_count: generateResponse.prompt_eval_count || 0,
-            prompt_eval_duration: generateResponse.prompt_eval_duration || 0,
-            eval_count: generateResponse.eval_count || 0,
-            eval_duration: generateResponse.eval_duration || 0
-        };
-    }
-
-    private toUnifiedChatResponseFromChat(chatResponse: Partial<ChatResponse>): UnifiedChatResponse {
-        return {
-            model: chatResponse.model || '',
-            created_at: chatResponse.created_at || new Date(),
-            message: chatResponse.message || { role: 'assistant', content: '' },
-            done: chatResponse.done || false,
-            done_reason: chatResponse.done_reason || '',
-            total_duration: chatResponse.total_duration || 0,
-            load_duration: chatResponse.load_duration || 0,
-            prompt_eval_count: chatResponse.prompt_eval_count || 0,
-            prompt_eval_duration: chatResponse.prompt_eval_duration || 0,
-            eval_count: chatResponse.eval_count || 0,
-            eval_duration: chatResponse.eval_duration || 0
-        };
-    }
-    //#endregion
 
     // private randomString(length: number): string {
     //     const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';

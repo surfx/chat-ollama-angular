@@ -35,13 +35,19 @@
             <div class="config-server-status">
                 @if(!isServerOnline()) {
                     <p class="server-offline">
-                        <i class="fa-solid fa-xmark"></i> Servidor Offline
+                        <i class="fa-solid fa-xmark"></i> 🦙 Offline
                     </p>
                 } @else {
                     <p class="server-online">
-                        <i class="fa-solid fa-check"></i> Servidor Online
+                        <i class="fa-solid fa-check"></i> 🦙 Online
                     </p>
                 }
+            </div>
+            <div class="config-chat-generate">
+                <input type="radio" id="chat" name="chat_generate" value="chat" [(ngModel)]="configuracoes.configuracoes!.modo">
+                <label for="chat">Chat</label>
+                <input type="radio" id="generate" name="chat_generate" value="generate" [(ngModel)]="configuracoes.configuracoes!.modo">
+                <label for="generate">Generate</label>
             </div>
             <div class="config-temperature">
                 <label for="temperature">Temperatura</label>
