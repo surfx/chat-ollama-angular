@@ -159,6 +159,9 @@ export class ChatOllamaPageComponent {
   public onFileSelected(event: any): void {
     this.images = [];
 
+    this.mensagemComponente?.show('Obs: nem todos os modelos suportam análise de imagem (llava:7b possui).', TipoMensagem.INFO, 1000);
+    this.scrollMsgAppMensagem();
+
     const files: FileList = event.target.files;
     for (let i = 0; i < files.length; i++) {
       const file = files[i];

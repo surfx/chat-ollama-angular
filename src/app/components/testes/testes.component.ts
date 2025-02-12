@@ -15,6 +15,8 @@ export class TestesComponent {
 
     @ViewChild('appchatdisplay') appchatdisplay: ChatDisplayComponent | undefined;
 
+    private readonly model = 'llava:7b';
+
     constructor(private ollamaChatService: OllamaChatService) {
 
     }
@@ -30,7 +32,7 @@ export class TestesComponent {
 
         let index: number | undefined = -1;
 
-        this.ollamaChatService.consultaOllama('chat', prompt, 'deepseek-v2:16b', 0.7, [], [])
+        this.ollamaChatService.consultaOllama('chat', prompt, this.model, 0.7, [], [])
             .pipe(delay(1000))
             .subscribe({
                 next: (res) => {
@@ -52,7 +54,26 @@ export class TestesComponent {
     }
 
     //--------------------
-    images: string[] = [];
+    // private images: Uint8Array[] = [];
+
+    // onFileSelected(event: any): void {
+    //     this.images = [];
+
+    //     const files: FileList = event.target.files;
+    //     for (let i = 0; i < files.length; i++) {
+    //         const file = files[i];
+    //         const reader = new FileReader();
+    
+    //         reader.onload = (e: any) => {
+    //             const arrayBuffer = e.target.result;
+    //             this.images.push(new Uint8Array(arrayBuffer));
+    //         };
+            
+    //         reader.readAsArrayBuffer(file);
+    //     }
+    // }
+
+    private images: string[] = [];
 
     onFileSelected(event: any): void {
         const files: FileList = event.target.files;
@@ -86,8 +107,8 @@ export class TestesComponent {
 
     onEnviar(): void {
         const requestData: GenerateRequest = {
-            model: 'deepseek-r1:7b',
-            prompt: 'Sabe me dizer qual é o nome da atriz da imagem ?',
+            model: this.model,
+            prompt: 'Descreva a imagem ?',
             images: this.images ?? []
         };
 
