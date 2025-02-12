@@ -108,7 +108,7 @@
         height: 90px;
 
         textarea {
-            width: 80%;
+            width: 75%;
             margin-right: 5px;
             padding: 10px;
         }
@@ -133,6 +133,18 @@
             button:first-child {
                 margin-bottom: 5px;
             }
+
+            button {
+                flex: 1;
+                width: 100%;
+            }
+        }
+
+        .btn_enviar_imagem {
+            width: 5%;
+            display: flex;
+            height: 100%;
+            margin-right: 5px;
 
             button {
                 flex: 1;

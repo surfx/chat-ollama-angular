@@ -60,7 +60,14 @@
                 <button (click)="btnLimparMensagem()" id="btnLimpar">Limpar</button>
                 <button (click)="btnAbortarMensagem()" id="btnAbortar">Abortar</button>
             </div>
-            
+            <div class="btn_enviar_imagem">
+                <input id="fileInputImage" type="file" (change)="onFileSelected($event)" multiple style="display: none;"
+                    [disabled]="configuracoes.configuracoes!.modo !== 'generate'">
+                <button id="btnEnviarImagem" onclick="javascript:document.getElementById('fileInputImage').click();"
+                    [disabled]="configuracoes.configuracoes!.modo !== 'generate'">
+                    <i class="fa-regular fa-image"></i>
+                </button>
+            </div>
             <button (click)="btnEnviarMensagem()" id="btnEnviar" [disabled]="!isServerOnline()">Enviar</button>
         </div>
 
