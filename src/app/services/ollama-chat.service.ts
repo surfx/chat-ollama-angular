@@ -31,7 +31,7 @@ export class OllamaChatService {
     images: Uint8Array[] | string[] = []
   ): Observable<UnifiedChatResponse> {
     if (modo === 'chat') {
-      return this.chatOllama(userPrompt, modelo, temperatura, history).pipe(map(this.toUnifiedChatResponseFromChat));
+      return this.chatOllama(userPrompt, modelo, temperatura, history, images).pipe(map(this.toUnifiedChatResponseFromChat));
     }
     return this.generateOllama(userPrompt, modelo, temperatura, history, images).pipe(map(this.toUnifiedChatResponseFromGenerateResponse));
   }
@@ -40,13 +40,14 @@ export class OllamaChatService {
     userPrompt: string,
     modelo = 'deepseek-v2:16b',
     temperatura: number = 0.7,
-    history: Message[] = []
+    history: Message[] = [],
+    images: Uint8Array[] | string[] = []
   ): Observable<ChatResponse> {
     return new Observable<ChatResponse>((observer) => {
 
       const streamResponse = this.ollama.chat({
         model: modelo,
-        messages: [...history, { role: 'user', content: userPrompt }],
+        messages: [...history, { role: 'user', content: userPrompt, images: images }],
         stream: true,
         options: {
           temperature: temperatura

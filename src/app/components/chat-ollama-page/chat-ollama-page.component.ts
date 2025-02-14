@@ -223,7 +223,7 @@ export class ChatOllamaPageComponent {
 
     let btnEnviar = document.getElementById('btnEnviar') as HTMLButtonElement;
     if (!btnEnviar) { return; }
-    btnEnviar.innerHTML = isLoading ? '<img src="/imagens/loading/infinity2.svg" alt="" width="100">' : 'Enviar';
+    btnEnviar.innerHTML = isLoading ? '<img src="/imagens/loading/infinity2.svg" class="loading_img_chat" alt="">' : 'Enviar';
   }
 
 }
