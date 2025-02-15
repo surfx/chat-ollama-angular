@@ -19,4 +19,11 @@
         overflow: hidden;
     }
 
+    @media only screen and (min-width: 601px) and (max-width: 800px) {
+        font-size: .7rem;
+    }
+
+    @media only screen and (max-width: 600px) {
+        font-size: .8rem;
+    }
 }

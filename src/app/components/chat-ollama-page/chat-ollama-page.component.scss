@@ -102,13 +102,7 @@
             }
         }
 
-        .config-chat-generate {
-            font-size: 0.9rem;
-
-            label {
-                margin-right: 5px;
-            }
-        }
+        // .config-chat-generate { }
 
         .config-temperature {
             display: grid;
@@ -198,13 +192,7 @@
                 font-size: 0.7rem;
             }
 
-            .config-chat-generate {
-                font-size: 0.5em;
-
-                label {
-                    margin-right: 2px;
-                }
-            }
+            // .config-chat-generate { }
 
             .config-temperature {
                 display: grid;
@@ -273,13 +261,7 @@
                 justify-self: end;
             }
 
-            .config-chat-generate {
-                font-size: 0.5em;
-
-                label {
-                    margin-right: 2px;
-                }
-            }
+            // .config-chat-generate { }
 
             .config-temperature {
                 display: grid;

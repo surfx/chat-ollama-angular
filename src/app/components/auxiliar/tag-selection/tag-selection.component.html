@@ -1,0 +1,12 @@
+@if(valoresSelecionados.length > 0) {
+    <div class="rdo_chat_generate">
+
+        @for (item of valoresSelecionados; track $index) {
+            <div class="rdo_chat {{valor_selecionado() === item ? 'selecionado' : ''}}" 
+                id="rdo_chat_{{$index}}" (click)="selectValor(item)">
+                {{item}}
+            </div>
+        }
+
+    </div>
+}

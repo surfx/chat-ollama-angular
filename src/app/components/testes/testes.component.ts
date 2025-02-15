@@ -1,25 +1,49 @@
-import { Component, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, Input, signal, ViewChild } from '@angular/core';
+import { GenerateRequest } from 'ollama';
 import { delay } from 'rxjs';
 import { OllamaChatService } from '../../services/ollama-chat.service';
 import { ChatDisplayComponent } from '../auxiliar/chat-display/chat-display.component';
-import { GenerateRequest } from 'ollama';
+import { TagSelectionComponent } from '../auxiliar/tag-selection/tag-selection.component';
 
 
 @Component({
     selector: 'app-testes',
-    imports: [ChatDisplayComponent],
+    imports: [ChatDisplayComponent, TagSelectionComponent],
     templateUrl: './testes.component.html',
     styleUrl: './testes.component.scss'
 })
 export class TestesComponent {
 
     @ViewChild('appchatdisplay') appchatdisplay: ChatDisplayComponent | undefined;
+    @ViewChild('tagSelection') tagSelection: TagSelectionComponent | undefined;
+
 
     private readonly model = 'llava:7b';
+
+    //configuracoes.configuracoes!.modo
+    public configuracoes = {
+        configuracoes: {
+            modo: 'chat'
+        }
+    };
+
+
+    protected valoresSelecionados: string[] = ['chat', 'generate'];
+    protected valorSelecionado = 'generate';
 
     constructor(private ollamaChatService: OllamaChatService) {
 
     }
+
+    btnTeste3() {
+        console.log('valorSelecionado: ', this.valorSelecionado);
+        console.log('this.tagSelection?.valorSelecionado: ', this.tagSelection?.valorSelecionado);
+    }
+    btnClearTagSelection() {
+        this.tagSelection?.clear();
+        this.btnTeste3();
+    }
+
 
     btnTeste1() {
         let prompt = `
@@ -63,12 +87,12 @@ export class TestesComponent {
     //     for (let i = 0; i < files.length; i++) {
     //         const file = files[i];
     //         const reader = new FileReader();
-    
+
     //         reader.onload = (e: any) => {
     //             const arrayBuffer = e.target.result;
     //             this.images.push(new Uint8Array(arrayBuffer));
     //         };
-            
+
     //         reader.readAsArrayBuffer(file);
     //     }
     // }

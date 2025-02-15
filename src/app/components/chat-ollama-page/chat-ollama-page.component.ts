@@ -9,6 +9,7 @@ import { OllamaChatService } from '../../services/ollama-chat.service';
 import { ChatDisplayComponent } from '../auxiliar/chat-display/chat-display.component';
 import { MensagensOverlayComponent } from '../mensagens/mensagens-overlay/mensagens-overlay.component';
 import { MensagensComponent } from '../mensagens/mensagens/mensagens.component';
+import { TagSelectionComponent } from '../auxiliar/tag-selection/tag-selection.component';
 
 @Component({
   selector: 'app-chat-ollama-page',
@@ -17,7 +18,8 @@ import { MensagensComponent } from '../mensagens/mensagens/mensagens.component';
     FormsModule,
     MensagensComponent,
     MensagensOverlayComponent,
-    ChatDisplayComponent
+    ChatDisplayComponent,
+    TagSelectionComponent
   ],
   templateUrl: './chat-ollama-page.component.html',
   styleUrl: './chat-ollama-page.component.scss',
@@ -28,6 +30,7 @@ export class ChatOllamaPageComponent {
   @ViewChild('mensagemComponente') mensagemComponente: MensagensComponent | undefined;
   @ViewChild('mensagensOverlayComponent') mensagensOverlayComponent: MensagensOverlayComponent | undefined;
   @ViewChild('appchatdisplay') appchatdisplay: ChatDisplayComponent | undefined;
+  @ViewChild('tagSelection') tagSelection: TagSelectionComponent | undefined;
 
   public configuracoes: Partial<Configuracoes> = {
     configuracoes: {
@@ -40,8 +43,8 @@ export class ChatOllamaPageComponent {
   protected userPrompt: string = '';
   protected modelos: ModelResponse[] | undefined;
   protected isServerOnline = signal(false);
+  protected valoresSelecionados: string[] = ['chat', 'generate'];
   private images: string[] = [];
-
 
   constructor(private configuracoesService: ConfiguracoesService, private ollamaChatService: OllamaChatService) {
     this.configuracoesService.getConfiguracao(this.defaultId).subscribe({
