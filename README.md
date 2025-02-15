@@ -3,6 +3,8 @@
 Projeto angular de chat com o [ollama](https://ollama.com/)
 
 ![](readme_imagens/chat_ollama.png)
+![](readme_imagens/chat_ollama_responsive.png)
+
 
 ## Índice
 
