@@ -54,7 +54,13 @@ export class ChatDisplayComponent {
     }
 
     public getHistorico(): Message[] {
-        return this.getMensagens().map(m => m.message);
+        return this.getMensagens().map(m => m.message)
+        // remove as imagens do histórico
+        .map(m => ({
+            role: m.role,
+            content: m.content,
+            tool_calls: m.tool_calls
+        }));
     }
 
     public scrollToLastMessage() {

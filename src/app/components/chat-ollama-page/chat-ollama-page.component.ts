@@ -178,6 +178,11 @@ export class ChatOllamaPageComponent {
 
       reader.readAsArrayBuffer(file);
     }
+
+    let fileInputImage = document.getElementById('fileInputImage') as HTMLInputElement;
+    if (!!fileInputImage) fileInputImage.value = '';
+
+    console.log(this.images);
   }
 
   private arrayBufferToBase64(buffer: Uint8Array): string {

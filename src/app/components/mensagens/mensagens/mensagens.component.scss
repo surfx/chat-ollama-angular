@@ -57,3 +57,23 @@
     display: flex;
     align-items: center;
 }
+
+@media only screen and (max-width: 900px) {
+
+    .mensagem {
+        padding: 10px;
+        margin: 5px 0;
+        font-size: 0.9rem;
+
+        i {
+            margin-right: 5px;
+        }
+    }
+
+}
+
+@media only screen and (max-width: 500px) {
+    .mensagem {
+        font-size: 0.7rem;
+    }
+}
