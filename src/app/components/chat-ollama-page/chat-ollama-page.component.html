@@ -10,7 +10,7 @@
         <div>
             <label for="config_ollama_api">Api Ollama</label>
             <input type="text" id="config_ollama_api" [(ngModel)]="configuracoes!.ollama_api" />
-            <button (click)="btnSalvarConfiguracoes()" [disabled]="!isServerOnline()">Salvar</button>
+            <button (click)="btnSalvarConfiguracoes()">Salvar</button>
         </div>
 
     </header>

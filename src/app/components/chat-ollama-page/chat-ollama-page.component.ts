@@ -52,6 +52,8 @@ export class ChatOllamaPageComponent {
       error: (err) => console.error(err),
       complete: () => { }
     });
+    if (this.configuracoes.ollama_api) this.ollamaChatService.setHost(this.configuracoes.ollama_api);
+
     this.ollamaChatService.listaModelos().pipe(delay(500)).subscribe({
       next: (res) => {
         this.modelos = res;
@@ -64,12 +66,14 @@ export class ChatOllamaPageComponent {
 
     // Teste
     //this.userPrompt = 'Crie uma classe em Java para tratar caracteres da String valorTeste que não estejam no range entre A e Z, use regex';
-    this.userPrompt = 'Descreva a imagem';
+    //this.userPrompt = 'Descreva a imagem';
   }
 
   //#region btns
   btnSalvarConfiguracoes() {
     if (!this.configuracoes || !this.configuracoes.ollama_api) { return; }
+    this.ollamaChatService.setHost(this.configuracoes.ollama_api);
+
     this.configuracoesService.updateConfiguracao(this.defaultId, this.configuracoes).subscribe({
       next: (res) => this.mensagensOverlayComponent?.show('Configurações Salvas', TipoMensagem.SUCESSO, 700),
       error: (err) => this.mensagensOverlayComponent?.show('Erro ao salvar as configurações', TipoMensagem.ERRO, 1000),

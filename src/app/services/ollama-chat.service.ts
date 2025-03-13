@@ -14,7 +14,7 @@ export class OllamaChatService {
 
   //private showdown  = require('showdown');
   //private converter = new Showdown.Converter();
-  private ollama = new Ollama({ host: 'http://192.168.0.2:11434' });
+  private ollama = new Ollama({ host: 'http://127.0.0.1:11434' });
 
   public setHost(host: string) {
     if (!host || host.trim().length <= 0) { return; }
