@@ -1,10 +1,9 @@
 .chat-container {
     display: grid;
-    grid-template-columns: 50px 1fr;
+    grid-template-columns: 50px 98%;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: start;
     margin: 5px 25px 25px 25px;
-    max-width: 98%;
 
     .chat-resposta {
         flex: 1;
@@ -12,6 +11,12 @@
         text-align: left;
         align-self: center;
 
+        markdown {
+            display: block;
+            max-width: 97%;
+            word-break: break-all;
+            overflow-wrap: break-word;
+        }
 
         .chat_loading_llama {
             display: flex;
@@ -44,7 +49,7 @@
 
 @media only screen and (min-width: 801px) and (max-width: 900px) {
     .chat-container {
-        grid-template-columns: 35px 1fr;
+        grid-template-columns: 35px 98%;
         margin: 4px 23px 20px 20px;
         font-size: 1rem;
 
@@ -78,7 +83,7 @@
 @media only screen and (max-width: 800px) {
 
     .chat-container {
-        grid-template-columns: 30px 1fr;
+        grid-template-columns: 30px 98%;
         margin: 4px 20px 15px 20px;
         font-size: 0.9rem;
 
