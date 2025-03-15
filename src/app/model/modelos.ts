@@ -7,8 +7,9 @@ export interface Configuracoes {
 }
 
 export interface ConfiguracoesClass {
-    temperatura: number;
     modo: 'chat' | 'generate';
+    rag: boolean;
+    temperatura: number;
 }
 
 export enum TipoMensagem {

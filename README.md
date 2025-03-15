@@ -72,6 +72,12 @@ Para instalar, p.ex., o modelo [deepseek-r1:7b](https://ollama.com/library/deeps
 ollama run deepseek-r1:7b
 ```
 
+[gemma3:27b](https://ollama.com/library/gemma3:27b)
+
+```bash
+ollama run gemma3:27b
+```
+
 ![](readme_imagens/ollama_deepseek.png)
 
 Exemplo de consulta via `curl`:
@@ -105,9 +111,10 @@ npm i clipboard@^2.0.11 --save
 - [x] Formatar o markdown de retorno
 - [x] Melhorar as mensagens
 - [x] Adicionar os estilos para as seções de código (resposta Ollama)
-- [ ] Explorar a Api de consulta para o Ollama
 - [x] Adicionar botão para copiar o código
 - [x] Implementar `ollama.abort()`
+- [ ] Implementar o projeto [rag-analise-yt](https://github.com/surfx/rag-analise-yt)
+- [ ] Explorar a Api de consulta para o Ollama
 
 # 🔗 Referências
 

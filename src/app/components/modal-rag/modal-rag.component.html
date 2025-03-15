@@ -1,0 +1,22 @@
+@if(visivel()){
+    <div class="modal-background" (click)="hide()">
+        <div class="modals-card">
+            <div class="modal-header">
+            <p class="modal-heading">Dados RAG</p>
+            <button class="exit-button" (click)="hide()">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 162 162" class="svgIconCross">
+                    <path stroke-linecap="round" stroke-width="17" stroke="black" d="M9.01074 8.98926L153.021 153"></path>
+                    <path stroke-linecap="round" stroke-width="17" stroke="black" d="M9.01074 153L153.021 8.98926"></path>
+                </svg>
+            </button>
+            </div>
+            <p class="modal-para">
+                Lorem, ipsum dolor sit amet consectetur adipisicing elit. Eligendi
+            </p>
+            <div class="button-wrapper">
+                <button class="accept modal-button" (click)="salvar()">Salvar</button>
+                <button class="reject modal-button" (click)="hide()">Fechar</button>
+            </div>
+        </div>
+    </div>
+}

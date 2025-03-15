@@ -8,7 +8,7 @@ import { Configuracoes } from '../model/modelos';
 })
 export class ConfiguracoesService {
 
-  private readonly apiUrl: string = 'http://localhost:3000/configuracao';
+  private readonly apiUrl: string = 'http://localhost:3000/configuracao'; // json-server
 
   constructor(private http: HttpClient) { }
 

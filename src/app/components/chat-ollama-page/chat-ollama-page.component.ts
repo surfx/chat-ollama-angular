@@ -10,6 +10,7 @@ import { ChatDisplayComponent } from '../auxiliar/chat-display/chat-display.comp
 import { MensagensOverlayComponent } from '../mensagens/mensagens-overlay/mensagens-overlay.component';
 import { MensagensComponent } from '../mensagens/mensagens/mensagens.component';
 import { TagSelectionComponent } from '../auxiliar/tag-selection/tag-selection.component';
+import { ModalRagComponent } from '../modal-rag/modal-rag.component';
 
 @Component({
   selector: 'app-chat-ollama-page',
@@ -19,7 +20,8 @@ import { TagSelectionComponent } from '../auxiliar/tag-selection/tag-selection.c
     MensagensComponent,
     MensagensOverlayComponent,
     ChatDisplayComponent,
-    TagSelectionComponent
+    TagSelectionComponent,
+    ModalRagComponent
   ],
   templateUrl: './chat-ollama-page.component.html',
   styleUrl: './chat-ollama-page.component.scss',
@@ -31,11 +33,13 @@ export class ChatOllamaPageComponent {
   @ViewChild('mensagensOverlayComponent') mensagensOverlayComponent: MensagensOverlayComponent | undefined;
   @ViewChild('appchatdisplay') appchatdisplay: ChatDisplayComponent | undefined;
   @ViewChild('tagSelection') tagSelection: TagSelectionComponent | undefined;
+  @ViewChild('modalRagComponent') modalRagComponent: ModalRagComponent | undefined;
 
   public configuracoes: Partial<Configuracoes> = {
     configuracoes: {
-      temperatura: 0.7,
-      modo: 'chat'
+      modo: 'chat',
+      rag: false,
+      temperatura: 0.7
     }
   };
   private readonly defaultId = 1;
@@ -161,6 +165,12 @@ export class ChatOllamaPageComponent {
   public updateChatMessage(index: number, response: UnifiedChatResponse): void {
     this.appchatdisplay?.updateMessage(index, response);
   }
+
+  //#region rag
+  public btnRag(): void {
+    this.modalRagComponent?.show();
+  }
+  //#endregion
 
   //#region image upload
   public onFileSelected(event: any): void {
