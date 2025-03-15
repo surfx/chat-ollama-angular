@@ -1,5 +1,5 @@
 <app-mensagens-overlay #mensagensOverlayComponent></app-mensagens-overlay>
-<app-modal-rag #modalRagComponent></app-modal-rag>
+<app-modal-rag #modalRagComponent (configuracoesSalvas)="evtConfiguracoesSalvas()"></app-modal-rag>
 
 <div class="container">
     <header class="header">
@@ -62,15 +62,20 @@
         
         <div class="input-section">
             <textarea class="textarea_chat" placeholder="Digite sua mensagem..." [(ngModel)]="userPrompt" id="txtUserPrompt" [disabled]="!isServerOnline()"></textarea>
+
             <button class="btn_limpar" (click)="btnLimparMensagem()" id="btnLimpar">Limpar</button>
+
             <button class="btn_abortar" (click)="btnAbortarMensagem()" id="btnAbortar">Abortar</button>
-            <input class="input_upload_imagem" id="fileInputImage" type="file" (change)="onFileSelected($event)" multiple>
+
             <button class="btn_rag" (click)="btnRag()" id="btnRag">
                 <i class="fa-regular fa-file"></i> Rag
             </button>
+
+            <input class="input_upload_imagem" id="fileInputImage" type="file" (change)="onFileSelected($event)" multiple>
             <button class="btn_upload_imagem" id="btnEnviarImagem" onclick="javascript:document.getElementById('fileInputImage').click();">
                 <i class="fa-regular fa-image"></i>
             </button>
+
             <button class="btn_enviar" (click)="btnEnviarMensagem()" id="btnEnviar" [disabled]="!isServerOnline()">Enviar</button>
         </div>
 

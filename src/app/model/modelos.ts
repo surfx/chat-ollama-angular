@@ -4,12 +4,19 @@ export interface Configuracoes {
     id: string;
     ollama_api: string;
     configuracoes: ConfiguracoesClass;
+    configuracoesRAG: ConfiguracoesRAG;
 }
 
 export interface ConfiguracoesClass {
     modo: 'chat' | 'generate';
     rag: boolean;
     temperatura: number;
+}
+
+export interface ConfiguracoesRAG {
+    urlServico: string;
+    collectionName: string;
+    pathDocumentos: string;
 }
 
 export enum TipoMensagem {

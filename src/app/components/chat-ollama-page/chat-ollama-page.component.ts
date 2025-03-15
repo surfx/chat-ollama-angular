@@ -52,11 +52,21 @@ export class ChatOllamaPageComponent {
 
   constructor(private configuracoesService: ConfiguracoesService, private ollamaChatService: OllamaChatService) {
     this.configuracoesService.getConfiguracao(this.defaultId).subscribe({
-      next: (res) => this.configuracoes = res,
+      next: (res) => {
+        this.configuracoes = res;
+        if (this.configuracoes.ollama_api) this.ollamaChatService.setHost(this.configuracoes.ollama_api);
+        if (!this.configuracoes.configuracoesRAG) {
+          this.configuracoes.configuracoesRAG = {
+            collectionName: 'local-rag',
+            pathDocumentos: '',
+            urlServico: 'http://127.0.0.1:5000/'
+          };
+        }
+      },
       error: (err) => console.error(err),
       complete: () => { }
     });
-    if (this.configuracoes.ollama_api) this.ollamaChatService.setHost(this.configuracoes.ollama_api);
+    
 
     this.ollamaChatService.listaModelos().pipe(delay(500)).subscribe({
       next: (res) => {
@@ -167,8 +177,15 @@ export class ChatOllamaPageComponent {
   }
 
   //#region rag
-  public btnRag(): void {
-    this.modalRagComponent?.show();
+  protected btnRag(): void {
+    if (!this.modalRagComponent) return;
+    this.modalRagComponent.configuracoes = this.configuracoes;
+    
+    this.modalRagComponent.show();
+  }
+
+  protected evtConfiguracoesSalvas(): void{
+    this.mensagensOverlayComponent?.show('Configurações Salvas', TipoMensagem.SUCESSO, 700);
   }
   //#endregion
 

@@ -115,6 +115,7 @@ npm i clipboard@^2.0.11 --save
 - [x] Implementar `ollama.abort()`
 - [ ] Implementar o projeto [rag-analise-yt](https://github.com/surfx/rag-analise-yt)
 - [ ] Explorar a Api de consulta para o Ollama
+- [ ] Alterar o projeto [rag-analise-yt](https://github.com/surfx/rag-analise-yt) na indexação - receber um conjunto de arquivos via POST
 
 # 🔗 Referências
 
