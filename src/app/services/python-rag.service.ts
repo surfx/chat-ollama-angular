@@ -37,6 +37,11 @@ export class PythonRagService {
     return this.http.get(url);
   }
 
+  public statusService(): Observable<any> {
+    const url = `${this.apiUrl}status`;
+    return this.http.get(url);
+  }
+
 }
 
 /*

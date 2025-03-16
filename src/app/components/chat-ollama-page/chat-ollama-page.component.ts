@@ -11,6 +11,7 @@ import { MensagensOverlayComponent } from '../mensagens/mensagens-overlay/mensag
 import { MensagensComponent } from '../mensagens/mensagens/mensagens.component';
 import { TagSelectionComponent } from '../auxiliar/tag-selection/tag-selection.component';
 import { ModalRagComponent } from '../modal-rag/modal-rag.component';
+import { PythonRagService } from '../../services/python-rag.service';
 
 @Component({
   selector: 'app-chat-ollama-page',
@@ -50,7 +51,11 @@ export class ChatOllamaPageComponent {
   protected valoresSelecionados: string[] = ['chat', 'generate'];
   private images: string[] = [];
 
-  constructor(private configuracoesService: ConfiguracoesService, private ollamaChatService: OllamaChatService) {
+  constructor(
+    private configuracoesService: ConfiguracoesService,
+    private ollamaChatService: OllamaChatService,
+    private pythonRagService: PythonRagService
+  ) {
     this.configuracoesService.getConfiguracao(this.defaultId).subscribe({
       next: (res) => {
         this.configuracoes = res;
@@ -66,7 +71,7 @@ export class ChatOllamaPageComponent {
       error: (err) => console.error(err),
       complete: () => { }
     });
-    
+
 
     this.ollamaChatService.listaModelos().pipe(delay(500)).subscribe({
       next: (res) => {
@@ -120,8 +125,53 @@ export class ChatOllamaPageComponent {
     this.updateChatTxt(this.userPrompt);
     this.loadingChat();
 
-    let index = -1;
 
+   
+
+    let completeMethod = () => {
+      this.mensagensOverlayComponent?.hide();
+      this.appchatdisplay?.scrollToLastMessage();
+      this.loadingChat(false);
+      this.toggleForm(false);
+    };
+
+    let msgErr = (message: string) => {
+      message = message || 'Erro ao consultar o serviço RAG';
+      this.updateChatTxt(message, true);
+      this.mensagensOverlayComponent?.show(message, TipoMensagem.ERRO, 700);
+      this.scrollMsgAppMensagem();
+      this.btnAbortarMensagem();
+    };
+
+    if (this.configuracoes.configuracoes?.rag) {
+      this.pythonRagService.statusService().subscribe({
+        next: (res) => {
+          if (!res || !res.success) {
+            msgErr(res.message || 'Erro ao realizar a consulta no RAG, serviço offline');
+            return;
+          }
+
+          this.pythonRagService.doQuestion(this.userPrompt).subscribe({
+            next: (res) => {
+              if (!res || !res.success) {
+                msgErr(res.message || 'Erro ao realizar a consulta no RAG');
+                return;
+              }
+
+              this.updateChatTxt(res.message, true);
+              this.loadingChat(false);
+              this.toggleForm(false);
+            },
+            error: (err) => { msgErr(err); },
+            complete: () => { completeMethod(); }
+          });
+        },
+        error: (err) => { msgErr(err); }
+      });
+      return;
+    }
+
+    let index = -1;
     this.ollamaChatService.consultaOllama(
       this.configuracoes.configuracoes?.modo,
       this.userPrompt, this.selectedModel, temperatura,
@@ -135,17 +185,8 @@ export class ChatOllamaPageComponent {
           this.updateChatMessage(index, res);
         }
       },
-      error: (err) => {
-        this.updateChatTxt(err, true);
-        this.mensagemComponente?.show('Erro na comunicação com o Ollama', TipoMensagem.ERRO, 700);
-        this.scrollMsgAppMensagem();
-      },
-      complete: () => {
-        this.mensagensOverlayComponent?.hide();
-        this.appchatdisplay?.scrollToLastMessage();
-        this.loadingChat(false);
-        this.toggleForm(false);
-      }
+      error: (err) => { msgErr(err); },
+      complete: () => { completeMethod(); }
     });
   }
   //#endregion
@@ -180,11 +221,11 @@ export class ChatOllamaPageComponent {
   protected btnRag(): void {
     if (!this.modalRagComponent) return;
     this.modalRagComponent.configuracoes = this.configuracoes;
-    
+
     this.modalRagComponent.show();
   }
 
-  protected evtConfiguracoesSalvas(): void{
+  protected evtConfiguracoesSalvas(): void {
     this.mensagensOverlayComponent?.show('Configurações Salvas', TipoMensagem.SUCESSO, 700);
   }
   //#endregion
@@ -216,7 +257,7 @@ export class ChatOllamaPageComponent {
     let fileInputImage = document.getElementById('fileInputImage') as HTMLInputElement;
     if (!!fileInputImage) fileInputImage.value = '';
 
-    console.log(this.images);
+    //console.log(this.images);
   }
 
   private arrayBufferToBase64(buffer: Uint8Array): string {
