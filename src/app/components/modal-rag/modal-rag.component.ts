@@ -5,8 +5,8 @@ import { Subject, Subscription, takeUntil } from 'rxjs';
 import { Configuracoes, StatusIndexacao, TipoMensagem } from '../../model/modelos';
 import { ConfiguracoesService } from '../../services/configuracoes.service';
 import { PythonRagService } from '../../services/python-rag.service';
-import { MensagensComponent } from '../mensagens/mensagens/mensagens.component';
 import { ProgressBarComponent, TipoProgressBar } from '../auxiliar/progress-bar/progress-bar.component';
+import { MensagensComponent } from '../mensagens/mensagens/mensagens.component';
 
 @Component({
   selector: 'app-modal-rag',
@@ -107,7 +107,11 @@ export class ModalRagComponent implements OnDestroy {
       return;
     }
 
-    
+    let btnIndexar = document.getElementById('btnIndexar') as HTMLButtonElement;
+    if (!!btnIndexar) btnIndexar.disabled = true;
+
+    this.mensagemComponente?.show('Início da indexação. Aguarde', TipoMensagem.INFO, 1000);
+    this.progressbarVisivel.set(true);
 
     this.pythonRagService.setHost(this.configuracoes.configuracoesRAG.urlServico);
     this.pythonRagService.indexarChromaDB(
@@ -122,6 +126,7 @@ export class ModalRagComponent implements OnDestroy {
       error: (err) => {
         console.error(err);
         this.mensagemComponente?.show('Erro ao iniciar a indexação', TipoMensagem.ERRO, 1000);
+        if (!!btnIndexar) btnIndexar.disabled = false;
       },
       complete: () => { }
     });
@@ -130,22 +135,31 @@ export class ModalRagComponent implements OnDestroy {
 
   //#region polling
   private doPolling(): void {
+    this.progressbarVisivel.set(true);
+    let btnIndexar = document.getElementById('btnIndexar') as HTMLButtonElement;
+    if (!!btnIndexar) btnIndexar.disabled = true;
+
     this.pollingSubscription = this.pythonRagService.getStatusIndexacaoWithPolling()
       .pipe(takeUntil(this.unsubscribe$)) // Para evitar vazamentos de memória ao destruir o componente
       .subscribe({
         next: (status) => {
+          if (!!btnIndexar) btnIndexar.disabled = true;
           this.progressbarVisivel.set(true);
           !!this.pollingStatus && this.pollingStatus.emit(status);
           this.progressbar.set(status.porcentagem);
           this.tipoProgressBar.set(TipoProgressBar.INFO);
           if (status.terminado === true || status.porcentagem >= 100) {
             console.log('Indexação Concluída:', status);
+            if (!!btnIndexar) btnIndexar.disabled = false;
             this.tipoProgressBar.set(TipoProgressBar.SUCESSO);
+            this.progressbar.set(100.0);
             this.mensagemComponente?.show('Indexação concluída', TipoMensagem.SUCESSO, 1000);
             this.endSubscription();
           }
         },
         error: (err) => {
+          if (!!btnIndexar) btnIndexar.disabled = false;
+
           //console.error('Erro no polling do status:', err);
           this.tipoProgressBar.set(TipoProgressBar.ERRO);
           this.endSubscription();
@@ -159,6 +173,7 @@ export class ModalRagComponent implements OnDestroy {
     this.unsubscribe$.complete();
     this.progressbarVisivel.set(false);
     this.progressbar.set(0.0);
+    //let btnIndexar = window.document.getElementById('btnIndexar') as HTMLButtonElement; btnIndexar.disabled = false;
   }
   //#endregion
 
