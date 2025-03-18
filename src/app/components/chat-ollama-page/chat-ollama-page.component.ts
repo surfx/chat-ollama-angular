@@ -3,7 +3,7 @@ import { Component, signal, ViewChild, ViewEncapsulation } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ModelResponse } from 'ollama';
 import { delay } from 'rxjs';
-import { Configuracoes, TipoMensagem, UnifiedChatResponse } from '../../model/modelos';
+import { Configuracoes, StatusIndexacao, TipoMensagem, UnifiedChatResponse } from '../../model/modelos';
 import { ConfiguracoesService } from '../../services/configuracoes.service';
 import { OllamaChatService } from '../../services/ollama-chat.service';
 import { ChatDisplayComponent } from '../auxiliar/chat-display/chat-display.component';
@@ -227,6 +227,12 @@ export class ChatOllamaPageComponent {
 
   protected evtConfiguracoesSalvas(): void {
     this.mensagensOverlayComponent?.show('Configurações Salvas', TipoMensagem.SUCESSO, 700);
+  }
+  protected evtPollingStatus(status: StatusIndexacao): void {
+    if (status.terminado === true) {
+      this.mensagensOverlayComponent?.show('Indexação Terminada', TipoMensagem.SUCESSO, 700);  
+    }
+    console.log('[evtPollingStatus]', status);
   }
   //#endregion
 

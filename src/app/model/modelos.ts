@@ -43,3 +43,8 @@ export interface UnifiedChatResponse {
     eval_duration: number;
 }
 //#endregion
+
+export interface StatusIndexacao {
+    terminado: boolean;
+    porcentagem: number;
+}

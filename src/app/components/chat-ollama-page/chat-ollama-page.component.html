@@ -1,5 +1,8 @@
 <app-mensagens-overlay #mensagensOverlayComponent></app-mensagens-overlay>
-<app-modal-rag #modalRagComponent (configuracoesSalvas)="evtConfiguracoesSalvas()"></app-modal-rag>
+<app-modal-rag #modalRagComponent 
+    (configuracoesSalvas)="evtConfiguracoesSalvas()"
+    (pollingStatus)="evtPollingStatus($event)"
+></app-modal-rag>
 
 <div class="container">
     <header class="header">

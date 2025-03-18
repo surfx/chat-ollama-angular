@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output, signal, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, Output, signal, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Configuracoes, TipoMensagem } from '../../model/modelos';
+import { Subject, Subscription, takeUntil } from 'rxjs';
+import { Configuracoes, StatusIndexacao, TipoMensagem } from '../../model/modelos';
 import { ConfiguracoesService } from '../../services/configuracoes.service';
-import { MensagensComponent } from '../mensagens/mensagens/mensagens.component';
 import { PythonRagService } from '../../services/python-rag.service';
+import { MensagensComponent } from '../mensagens/mensagens/mensagens.component';
 
 @Component({
   selector: 'app-modal-rag',
@@ -16,11 +17,15 @@ import { PythonRagService } from '../../services/python-rag.service';
   templateUrl: './modal-rag.component.html',
   styleUrl: './modal-rag.component.scss'
 })
-export class ModalRagComponent {
+export class ModalRagComponent implements OnDestroy {
 
+  private unsubscribe$ = new Subject<void>();
+  private pollingSubscription: Subscription | undefined;
   protected visivel = signal<boolean>(false);
+
   @Input() configuracoes: Partial<Configuracoes> | undefined;
   @Output() configuracoesSalvas = new EventEmitter<void>();
+  @Output() pollingStatus = new EventEmitter<StatusIndexacao>();
 
   @ViewChild('mensagemComponente') mensagemComponente: MensagensComponent | undefined;
 
@@ -28,6 +33,11 @@ export class ModalRagComponent {
     private configuracoesService: ConfiguracoesService,
     private pythonRagService: PythonRagService
   ) { }
+
+
+  ngOnDestroy(): void {
+    this.endSubscription();
+  }
 
   public show(): void {
     this.visivel.set(true);
@@ -66,8 +76,6 @@ export class ModalRagComponent {
     let txtCollectionName = document.getElementById('txtCollectionName') as HTMLInputElement;
     let txtPathDocumentos = document.getElementById('txtPathDocumentos') as HTMLInputElement;
 
-    console.log(this.pythonRagService)
-
     if (!this.pythonRagService) {
       this.mensagemComponente?.show('Erro ao recuperar o serviço', TipoMensagem.ERRO, 700);
       return;
@@ -100,6 +108,7 @@ export class ModalRagComponent {
     ).subscribe({
       next: (res) => {
         this.mensagemComponente?.show('A indexação será feita em segundo plano', TipoMensagem.INFO, 1000);
+        this.doPolling();
         setTimeout(() => { this.hide(); }, 1000);
       },
       error: (err) => {
@@ -110,6 +119,33 @@ export class ModalRagComponent {
     });
 
   }
+
+  //#region polling
+  private doPolling(): void {
+    this.pollingSubscription = this.pythonRagService.getStatusIndexacaoWithPolling()
+      .pipe(takeUntil(this.unsubscribe$)) // Para evitar vazamentos de memória ao destruir o componente
+      .subscribe({
+        next: (status) => {
+          !!this.pollingStatus && this.pollingStatus.emit(status);
+          if (status.terminado === true || status.porcentagem >= 100) {
+            console.log('Indexação Concluída:', status);
+            this.mensagemComponente?.show('Indexação concluída', TipoMensagem.SUCESSO, 1000);
+            this.endSubscription();
+          }
+        },
+        error: (err) => {
+          console.error('Erro no polling do status:', err);
+          this.endSubscription();
+        }
+      });
+  }
+
+  private endSubscription(): void {
+    this.pollingSubscription?.unsubscribe();
+    this.unsubscribe$.next();
+    this.unsubscribe$.complete();
+  }
+  //#endregion
 
   // public onFileSelected(event: any): void {
   //   const files: FileList = event.target.files;
