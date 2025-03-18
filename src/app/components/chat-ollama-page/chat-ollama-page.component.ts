@@ -232,7 +232,7 @@ export class ChatOllamaPageComponent {
     if (status.terminado === true) {
       this.mensagensOverlayComponent?.show('Indexação Terminada', TipoMensagem.SUCESSO, 700);  
     }
-    console.log('[evtPollingStatus]', status);
+    //console.log('[evtPollingStatus]', status);
   }
   //#endregion
 

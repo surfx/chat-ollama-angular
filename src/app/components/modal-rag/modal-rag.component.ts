@@ -6,13 +6,15 @@ import { Configuracoes, StatusIndexacao, TipoMensagem } from '../../model/modelo
 import { ConfiguracoesService } from '../../services/configuracoes.service';
 import { PythonRagService } from '../../services/python-rag.service';
 import { MensagensComponent } from '../mensagens/mensagens/mensagens.component';
+import { ProgressBarComponent, TipoProgressBar } from '../auxiliar/progress-bar/progress-bar.component';
 
 @Component({
   selector: 'app-modal-rag',
   imports: [
     CommonModule,
     FormsModule,
-    MensagensComponent
+    MensagensComponent,
+    ProgressBarComponent
   ],
   templateUrl: './modal-rag.component.html',
   styleUrl: './modal-rag.component.scss'
@@ -22,6 +24,10 @@ export class ModalRagComponent implements OnDestroy {
   private unsubscribe$ = new Subject<void>();
   private pollingSubscription: Subscription | undefined;
   protected visivel = signal<boolean>(false);
+
+  protected progressbar = signal(0.0);
+  protected tipoProgressBar = signal(TipoProgressBar.INFO);
+  protected progressbarVisivel = signal(false);
 
   @Input() configuracoes: Partial<Configuracoes> | undefined;
   @Output() configuracoesSalvas = new EventEmitter<void>();
@@ -101,6 +107,8 @@ export class ModalRagComponent implements OnDestroy {
       return;
     }
 
+    
+
     this.pythonRagService.setHost(this.configuracoes.configuracoesRAG.urlServico);
     this.pythonRagService.indexarChromaDB(
       this.configuracoes.configuracoesRAG.pathDocumentos,
@@ -109,7 +117,7 @@ export class ModalRagComponent implements OnDestroy {
       next: (res) => {
         this.mensagemComponente?.show('A indexação será feita em segundo plano', TipoMensagem.INFO, 1000);
         this.doPolling();
-        setTimeout(() => { this.hide(); }, 1000);
+        //setTimeout(() => { this.hide(); }, 1000);
       },
       error: (err) => {
         console.error(err);
@@ -126,15 +134,20 @@ export class ModalRagComponent implements OnDestroy {
       .pipe(takeUntil(this.unsubscribe$)) // Para evitar vazamentos de memória ao destruir o componente
       .subscribe({
         next: (status) => {
+          this.progressbarVisivel.set(true);
           !!this.pollingStatus && this.pollingStatus.emit(status);
+          this.progressbar.set(status.porcentagem);
+          this.tipoProgressBar.set(TipoProgressBar.INFO);
           if (status.terminado === true || status.porcentagem >= 100) {
             console.log('Indexação Concluída:', status);
+            this.tipoProgressBar.set(TipoProgressBar.SUCESSO);
             this.mensagemComponente?.show('Indexação concluída', TipoMensagem.SUCESSO, 1000);
             this.endSubscription();
           }
         },
         error: (err) => {
-          console.error('Erro no polling do status:', err);
+          //console.error('Erro no polling do status:', err);
+          this.tipoProgressBar.set(TipoProgressBar.ERRO);
           this.endSubscription();
         }
       });
@@ -144,6 +157,8 @@ export class ModalRagComponent implements OnDestroy {
     this.pollingSubscription?.unsubscribe();
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
+    this.progressbarVisivel.set(false);
+    this.progressbar.set(0.0);
   }
   //#endregion
 

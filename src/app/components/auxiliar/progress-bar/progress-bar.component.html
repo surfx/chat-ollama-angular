@@ -1,0 +1,8 @@
+@if(visivel()){
+    <div class="progress-bar-container">
+        <div class="progress-bar" [class]="tipoProgressBar()" [style.width.%]="progresso()">
+            <!-- {minIntegerDigits}.{minFractionDigits}-{maxFractionDigits} -->
+            {{ progresso() | number:'1.1-2' }}% completo
+        </div>
+    </div>
+}

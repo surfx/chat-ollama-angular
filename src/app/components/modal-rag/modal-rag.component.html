@@ -30,8 +30,11 @@
                     </button> -->
                 </div>
                 
-
+                <div class="div-progress-bar">
+                    <app-progress-bar [progresso]="progressbar" [tipoProgressBar]="tipoProgressBar" [visivel]="progressbarVisivel"></app-progress-bar>
+                </div>
             </div>
+
             <div class="button-wrapper">
                 <button class="accept modal-button" (click)="salvar()">Salvar</button>
                 <button class="indexar modal-button" (click)="indexar()">Indexar</button>

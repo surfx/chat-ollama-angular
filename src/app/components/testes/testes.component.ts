@@ -4,11 +4,12 @@ import { delay } from 'rxjs';
 import { OllamaChatService } from '../../services/ollama-chat.service';
 import { ChatDisplayComponent } from '../auxiliar/chat-display/chat-display.component';
 import { TagSelectionComponent } from '../auxiliar/tag-selection/tag-selection.component';
+import { ProgressBarComponent, TipoProgressBar } from '../auxiliar/progress-bar/progress-bar.component';
 
 
 @Component({
     selector: 'app-testes',
-    imports: [ChatDisplayComponent, TagSelectionComponent],
+    imports: [ChatDisplayComponent, TagSelectionComponent, ProgressBarComponent],
     templateUrl: './testes.component.html',
     styleUrl: './testes.component.scss'
 })
@@ -17,8 +18,10 @@ export class TestesComponent {
     @ViewChild('appchatdisplay') appchatdisplay: ChatDisplayComponent | undefined;
     @ViewChild('tagSelection') tagSelection: TagSelectionComponent | undefined;
 
-
     private readonly model = 'llava:7b';
+
+    progressbar = signal(74.5);
+    tipoProgressBar = signal(TipoProgressBar.INFO);
 
     //configuracoes.configuracoes!.modo
     public configuracoes = {
