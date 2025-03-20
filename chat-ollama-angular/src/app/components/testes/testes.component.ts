@@ -1,20 +1,110 @@
-import { AfterViewInit, Component, Input, signal, ViewChild } from '@angular/core';
+import { Component, signal, ViewChild } from '@angular/core';
 import { GenerateRequest } from 'ollama';
 import { delay } from 'rxjs';
 import { OllamaChatService } from '../../services/ollama-chat.service';
 import { ChatDisplayComponent } from '../auxiliar/chat-display/chat-display.component';
-import { TagSelectionComponent } from '../auxiliar/tag-selection/tag-selection.component';
 import { ProgressBarComponent, TipoProgressBar } from '../auxiliar/progress-bar/progress-bar.component';
+import { TagSelectionComponent } from '../auxiliar/tag-selection/tag-selection.component';
+import { CommonModule } from '@angular/common';
+import { HttpClient, HttpEventType } from '@angular/common/http';
 
 
 @Component({
     selector: 'app-testes',
-    imports: [ChatDisplayComponent, TagSelectionComponent, ProgressBarComponent],
+    imports: [
+        ChatDisplayComponent, TagSelectionComponent, ProgressBarComponent,
+        CommonModule
+    ],
     templateUrl: './testes.component.html',
     styleUrl: './testes.component.scss'
 })
 export class TestesComponent {
 
+    files: File[] = [];
+    isDragging = false;
+    uploadProgress = 0;
+
+    constructor(private ollamaChatService: OllamaChatService, private http: HttpClient) {
+
+    }
+
+    onDragOver(event: DragEvent): void {
+        event.preventDefault();
+        event.stopPropagation();
+        this.isDragging = true;
+    }
+
+    onDragLeave(event: DragEvent): void {
+        event.preventDefault();
+        event.stopPropagation();
+        this.isDragging = false;
+    }
+
+    onDrop(event: DragEvent): void {
+        event.preventDefault();
+        event.stopPropagation();
+        this.isDragging = false;
+        const droppedFiles = event.dataTransfer?.files;
+        if (droppedFiles) {
+            this.addFiles(Array.from(droppedFiles));
+        }
+    }
+
+    onFileSelect(event: any): void {
+        const selectedFiles = event.target.files;
+        if (selectedFiles) {
+            this.addFiles(Array.from(selectedFiles));
+            // Limpar o valor do input para permitir selecionar o mesmo arquivo novamente
+            event.target.value = '';
+        }
+    }
+
+    addFiles(newFiles: File[]): void {
+        this.files = this.files.concat(newFiles);
+    }
+
+    onUpload(): void {
+        if (this.files.length > 0) {
+          const formData = new FormData();
+          for (const file of this.files) {
+            formData.append('files', file); // 'files' deve corresponder à chave esperada no Flask (request.files.getlist('files'))
+          }
+    
+          this.uploadProgress = 0;
+    
+          this.http.post<any>('http://127.0.0.1:5000/upload', formData, {
+            reportProgress: true,
+            observe: 'events'
+          })
+          .subscribe({
+            next: (event) => {
+                if (event.type === HttpEventType.UploadProgress) {
+                    if (event.total) {
+                      this.uploadProgress = Math.round((100 * event.loaded) / event.total);
+                      console.log(`Progresso do Upload: ${this.uploadProgress}%`);
+                    }
+                  } else if (event.type === HttpEventType.Response) {
+                    console.log('Upload Completo!', event.body);
+                    this.files = [];
+                    this.uploadProgress = 0;
+                  }
+              },
+              error: (err) => {
+                console.error('Erro no Upload:', err);
+                this.uploadProgress = 0;
+              },
+              complete: () => { }
+          });
+        } else {
+          console.log("Nenhum arquivo selecionado para enviar.");
+        }
+      }
+
+    onClearFiles(): void {
+        this.files = [];
+    }
+
+    //#region old
     @ViewChild('appchatdisplay') appchatdisplay: ChatDisplayComponent | undefined;
     @ViewChild('tagSelection') tagSelection: TagSelectionComponent | undefined;
 
@@ -34,9 +124,7 @@ export class TestesComponent {
     protected valoresSelecionados: string[] = ['chat', 'generate'];
     protected valorSelecionado = 'generate';
 
-    constructor(private ollamaChatService: OllamaChatService) {
-
-    }
+    
 
     btnTeste3() {
         console.log('valorSelecionado: ', this.valorSelecionado);
@@ -166,5 +254,6 @@ export class TestesComponent {
             });
 
     }
+    //#endregion
 
 }

@@ -1,41 +1,66 @@
-<div style="margin: 50px;">
-    <a href="/">Home</a>
+<div class="upload-container">
+    <div
+        class="drop-area"
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave($event)"
+        (drop)="onDrop($event)"
+        [class.highlight]="isDragging"
+        (click)="fileInput.click()"
+    >
+        <p>Arraste e solte os arquivos aqui ou clique para selecionar</p>
+        <input type="file" id="file-input" multiple style="display: none;" (change)="onFileSelect($event)" #fileInput>
+    </div>
+
+    <div class="buttons-container">
+        <button class="upload-button" (click)="onUpload()" [disabled]="files.length === 0">Enviar Arquivos</button>
+        <button class="clear-button" (click)="onClearFiles()" [disabled]="files.length === 0">Limpar Lista</button>
+    </div>
 </div>
 
-<div style="max-width: 500px;">
-    <app-progress-bar [progresso]="progressbar" [tipoProgressBar]="tipoProgressBar"></app-progress-bar>
+<ul class="file-list">
+    <li *ngFor="let file of files">{{ file.name }}</li>
+</ul>
+
+<div style="display: none;">
+    <div style="margin: 50px;">
+        <a href="/">Home</a>
+    </div>
+
+    <div style="max-width: 500px;">
+        <app-progress-bar [progresso]="progressbar" [tipoProgressBar]="tipoProgressBar"></app-progress-bar>
+    </div>
+
+    <div>
+        <button (click)="btnTeste1()">Teste 1</button>
+        <!-- <button (click)="btnTeste2()">Teste 2</button> -->
+    </div>
+
+    <div>
+        <input type="file" (change)="onFileSelected($event)" multiple>
+        <button (click)="onEnviar()">Enviar</button>
+    </div>
+
+    <br /><br />
+    <div style="margin-left: 100px; max-width: 130px;">
+        <!-- <div class="rdo_chat_generate">
+
+            @for (item of valoresSelecionados; track $index) {
+                <div class="rdo_chat {{valor_selecionado() === item ? 'selecionado' : ''}}" 
+                    id="rdo_chat_{{$index}}" (click)="valor_selecionado.set(item)">
+                    {{item}}
+                </div>
+            }
+
+        </div> -->
+
+        <app-tag-selection #tagSelection 
+            [valoresSelecionados]="valoresSelecionados"
+            [(valorSelecionado)]="valorSelecionado"
+        ></app-tag-selection>
+        <button (click)="btnTeste3()">Teste 3</button>
+        <button (click)="btnClearTagSelection()">btnClearTagSelection</button>
+    </div>
+    <br /><br />
+
+    <app-chat-display #appchatdisplay></app-chat-display>
 </div>
-
-<div>
-    <button (click)="btnTeste1()">Teste 1</button>
-    <!-- <button (click)="btnTeste2()">Teste 2</button> -->
-</div>
-
-<div>
-    <input type="file" (change)="onFileSelected($event)" multiple>
-    <button (click)="onEnviar()">Enviar</button>
-</div>
-
-<br /><br />
-<div style="margin-left: 100px; max-width: 130px;">
-    <!-- <div class="rdo_chat_generate">
-
-        @for (item of valoresSelecionados; track $index) {
-            <div class="rdo_chat {{valor_selecionado() === item ? 'selecionado' : ''}}" 
-                id="rdo_chat_{{$index}}" (click)="valor_selecionado.set(item)">
-                {{item}}
-            </div>
-        }
-
-    </div> -->
-
-    <app-tag-selection #tagSelection 
-        [valoresSelecionados]="valoresSelecionados"
-        [(valorSelecionado)]="valorSelecionado"
-    ></app-tag-selection>
-    <button (click)="btnTeste3()">Teste 3</button>
-    <button (click)="btnClearTagSelection()">btnClearTagSelection</button>
-</div>
-<br /><br />
-
-<app-chat-display #appchatdisplay></app-chat-display>
