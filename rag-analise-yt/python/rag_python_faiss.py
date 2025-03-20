@@ -1,8 +1,8 @@
 # Como executar:
 # cd E:\programas\ia\virtual_environment && my_env_3129\Scripts\activate
-# uv run D:\meus_documentos\workspace\ia\rag\rag002\python\rag_python_faiss.py
+# uv run D:\meus_documentos\workspace\ia\chat-ollama-angular\rag-analise-yt\python\rag_python_faiss.py
 
-PATH_ARQUIVOS = r"D:\meus_documentos\workspace\ia\rag\rag002\data"
+PATH_ARQUIVOS = r"D:\meus_documentos\workspace\ia\chat-ollama-angular\rag-analise-yt\data"
 LANG = "por" # por | eng
 # Diretório onde o banco de dados será salvo
 persist_directory = r"D:\meus_documentos\workspace\ia\rag\rag002\db\faiss_db"
@@ -223,6 +223,11 @@ from langchain.docstore.document import Document
 
 class FaissBatch:
 
+    status_indexacao = {
+        "terminado": False,
+        "porcentagem": 0.0
+    }
+
     # embedding_model = OllamaEmbeddings(model="nomic-embed-text")
     # vectorstore = get_vector_store()
 
@@ -237,6 +242,9 @@ class FaissBatch:
         doc_converter_global = DoclingAuxiliar().get_doc_converter()
         self.chunkAux = ChunksAux(doc_converter_global)
         self.separarDocumentos = SepararDocumentos()
+        
+        self.status_indexacao["porcentagem"] = 0
+        self.status_indexacao["terminado"] = False
 
     def generate_id_filename(self, filename, page_index):
         filename = os.path.basename(filename)
@@ -255,26 +263,43 @@ class FaissBatch:
     ):
         """Indexa chunks em lote no FAISS."""
 
+        self.status_indexacao["porcentagem"] = 0
+        self.status_indexacao["terminado"] = False
+
         imagens, documentos = self.separarDocumentos.separar_arquivos(path_arquivos)
+        total_arquivos = len(imagens) + len(documentos)
+        arquivos_processados = 0
 
         for imagem in imagens:
             id_aux = self.generate_id_filename(imagem, 0)
             results = self.vectorstore.get_by_ids([id_aux]);
             if results and results[0].id and id_aux in results[0].id:
                 print(f"Documento com ID {id_aux} | {os.path.basename(imagem)} já existe na coleção.")
+
+                arquivos_processados += 1
+                self.status_indexacao["porcentagem"] = int((arquivos_processados / total_arquivos) * 100)
                 continue
 
-            self.faiss_indexing_batch(self.chunkAux.get_chunks_image(imagem), self.vectorstore)
+            self.faiss_indexing_batch(self.chunkAux.get_chunks_image(imagem))
+            arquivos_processados += 1
+            self.status_indexacao["porcentagem"] = int((arquivos_processados / total_arquivos) * 100)
 
         for documento in documentos:
             id_aux = self.generate_id_filename(documento, 0)
             results = self.vectorstore.get_by_ids([id_aux]);
             if results and results[0].id and id_aux in results[0].id:
                 print(f"Documento com ID {id_aux} | {os.path.basename(documento)} já existe na coleção.")
+
+                arquivos_processados += 1
+                self.status_indexacao["porcentagem"] = int((arquivos_processados / total_arquivos) * 100)
                 continue
 
-            self.faiss_indexing_batch(self.chunkAux.get_chunks_doc(documento), self.vectorstore)
+            self.faiss_indexing_batch(self.chunkAux.get_chunks_doc(documento))
+            arquivos_processados += 1
+            self.status_indexacao["porcentagem"] = int((arquivos_processados / total_arquivos) * 100)
 
+        self.status_indexacao["porcentagem"] = 100
+        self.status_indexacao["terminado"] = True
         return self.vectorstore
         
 
@@ -331,7 +356,7 @@ from langchain_ollama.chat_models import ChatOllama
 from langchain_core.runnables import RunnablePassthrough
 from langchain.retrievers.multi_query import MultiQueryRetriever
 from langchain_ollama import OllamaEmbeddings 
-from IPython.display import display, Markdown
+# from IPython.display import display, Markdown
 
 class FaissRAG:
 
@@ -382,9 +407,9 @@ class FaissRAG:
             raise ValueError("Você deve fornecer o 'prompt'.")
         return self.chain.invoke(prompt)
 
-faissAuxiliar = FaissAuxiliar(embedding_model_name, persist_directory)
-vectorstore = faissAuxiliar.get_vector_store()
-faissRAG = FaissRAG(vectorstore, embedding_model_name, persist_directory, local_model)
+# faissAuxiliar = FaissAuxiliar(embedding_model_name, persist_directory)
+# vectorstore = faissAuxiliar.get_vector_store()
+# faissRAG = FaissRAG(vectorstore, embedding_model_name, persist_directory, local_model)
 
-#display(Markdown(faissRAG.do_prompt("Qual a cor do Monopoly ?")))
-print(faissRAG.do_prompt("Qual a cor do Monopoly ?"))
+# #display(Markdown(faissRAG.do_prompt("Qual a cor do Monopoly ?")))
+# print(faissRAG.do_prompt("Qual a cor do Monopoly ?"))

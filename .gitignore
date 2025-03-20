@@ -40,3 +40,8 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+
+# arquivos para RAG
+data/
+rag-analise-yt/python/__pycache__/rag_python_faiss.cpython-312.pyc
+db/

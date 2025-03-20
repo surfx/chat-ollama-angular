@@ -1,10 +1,10 @@
 # Como executar:
 # cd E:\programas\ia\virtual_environment && my_env_3129\Scripts\activate
-# uv run D:\meus_documentos\workspace\ia\rag\rag002\python\rag_python_chroma.py
+# uv run D:\meus_documentos\workspace\ia\chat-ollama-angular\rag-analise-yt\python\rag_python_chroma.py
 
 # para saber como consultar: ver final do arquivo - curls
 
-PATH_ARQUIVOS = r"data"
+PATH_ARQUIVOS = r"D:\meus_documentos\workspace\ia\chat-ollama-angular\rag-analise-yt\data"
 LANG = "por" # por | eng
 # persist_directory = "chroma/chroma_db"  # Diretório onde o banco de dados será salvo
 persist_directory = r"D:\meus_documentos\workspace\ia\rag\rag002\db\chroma\chroma_db"
@@ -449,10 +449,10 @@ if __name__ == '__main__':
 
 # Como executar
 # cd E:\programas\ia\virtual_environment && my_env_3129\Scripts\activate
-# uv run D:\meus_documentos\workspace\ia\rag\rag002\python\rag_python_chroma.py
+# uv run D:\meus_documentos\workspace\ia\chat-ollama-angular\rag-analise-yt\python\rag_python_chroma.py
 
 # curls
-#  curl -X POST -H "Content-Type: text/plain" -d "D:\meus_documentos\workspace\ia\rag\rag002\data" http://127.0.0.1:5000/indexarChromaDB?collection_name=local-rag
+#  curl -X POST -H "Content-Type: text/plain" -d "D:\meus_documentos\workspace\ia\chat-ollama-angular\rag-analise-yt\data" http://127.0.0.1:5000/indexarChromaDB?collection_name=local-rag
 #  curl "http://127.0.0.1:5000/doQuestion?prompt=Como+jogar+monopoly+%3F"
 #  curl -X DELETE "http://127.0.0.1:5000/deleteCollection?collection_name=local-rag"
 #  curl "http://127.0.0.1:5000/resetChroma"

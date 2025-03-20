@@ -7,7 +7,7 @@ pelo [Ollama](https://ollama.com/).
 O servidor Flask executa no endereço [http://127.0.0.1:5000](http://127.0.0.1:5000), arquivo `rag_python_chroma.py`
 
 Exemplo de indexação curl: 
-- `curl -X POST -H "Content-Type: text/plain" -d "D:\meus_documentos\workspace\ia\rag\rag002\data" http://127.0.0.1:5000/indexarChromaDB?collection_name=local-rag`
+- `curl -X POST -H "Content-Type: text/plain" -d "D:\meus_documentos\workspace\ia\chat-ollama-angular\rag-analise-yt\data" http://127.0.0.1:5000/indexarChromaDB?collection_name=local-rag`
 
 Para mais informações veja a seção `Curls` > `Indexar`.
 
@@ -160,7 +160,7 @@ Para subir um servidor flask, execute o arquivo `rag_python_chroma.py`
 
 ```bash
 cd E:\programas\ia\virtual_environment && my_env_3129\Scripts\activate
-uv run D:\meus_documentos\workspace\ia\rag\rag002\python\rag_python_chroma.py
+uv run D:\meus_documentos\workspace\ia\chat-ollama-angular\rag-analise-yt\python\rag_python_chroma.py
 ```
 
 ![uv rag python](readme_imagens/uv_rag_python.png)
@@ -185,7 +185,7 @@ Para indexar os arquivos no [Chromadb](https://www.trychroma.com/):
 | Pasta    | D:\\meus_documentos\\workspace\\ia\\rag\\rag002\\data |
 | Coleção  | local-rag                                             |
 
-`curl -X POST -H "Content-Type: text/plain" -d "D:\meus_documentos\workspace\ia\rag\rag002\data" http://127.0.0.1:5000/indexarChromaDB?collection_name=local-rag`
+`curl -X POST -H "Content-Type: text/plain" -d "D:\meus_documentos\workspace\ia\chat-ollama-angular\rag-analise-yt\data" http://127.0.0.1:5000/indexarChromaDB?collection_name=local-rag`
 
 Todos arquivos que estiverem no diretório (e subdiretórios) informado serão indexados no [Chromadb](https://www.trychroma.com/) na pasta: 
 
