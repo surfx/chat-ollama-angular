@@ -81,8 +81,44 @@ def status_service():
 def status_indexacao_func():
     return jsonify(faissBatch.status_indexacao), 200
 
+# -----------------------------
+# TESTE UPLOAD
+# -----------------------------
+UPLOAD_FOLDER = r"D:\meus_documentos\workspace\ia\chat-ollama-angular\rag-analise-yt\uploads_temp"  # Pasta onde os arquivos serão salvos no servidor
+ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'html'} # Extensões permitidas (opcional)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# Certifique-se de que a pasta de uploads exista
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    if 'files' not in request.files:
+        return jsonify({'message': 'Nenhum arquivo enviado'}), 400
+
+    files = request.files.getlist('files') # Pega a lista de arquivos enviados com o nome 'files'
+    filenames = []
+
+    for file in files:
+        if file.filename == '':
+            return jsonify({'message': 'Um ou mais arquivos sem nome'}), 400
+
+        # Opcional: verificar extensão se allowed_file estiver implementado
+        # if file and allowed_file(file.filename):
+        if file:
+            filename = file.filename # Você pode querer gerar um nome único aqui
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(filepath)
+            filenames.append(filename)
+
+    return jsonify({'message': 'Arquivos enviados com sucesso', 'filenames': filenames}), 201
+
 if __name__ == '__main__':
     rpf.TorchInit().init_torch()
+    # app.run(debug=True, host='0.0.0.0', port=5000)
     app.run(debug=True)
 
 
