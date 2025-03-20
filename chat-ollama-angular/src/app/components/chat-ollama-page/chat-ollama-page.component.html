@@ -54,7 +54,11 @@
                 ></app-tag-selection>
             </div>
             <div class="config-chat-rag">
-                <input type="checkbox" id="chkRag" [(ngModel)]="configuracoes.configuracoes!.rag" [disabled]="!isServerOnline()">
+                <input type="checkbox" id="chkRag" 
+                    [(ngModel)]="configuracoes.configuracoes!.rag" 
+                    [disabled]="!isServerOnline()"
+                    (change)="onchangeChkRag()"
+                >
                 <label for="chkRag">Rag</label>
             </div>
             <div class="config-temperature">

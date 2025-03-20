@@ -62,7 +62,6 @@ export class ChatOllamaPageComponent {
         if (this.configuracoes.ollama_api) this.ollamaChatService.setHost(this.configuracoes.ollama_api);
         if (!this.configuracoes.configuracoesRAG) {
           this.configuracoes.configuracoesRAG = {
-            collectionName: 'local-rag',
             pathDocumentos: '',
             urlServico: 'http://127.0.0.1:5000/'
           };
@@ -89,13 +88,19 @@ export class ChatOllamaPageComponent {
   }
 
   //#region btns
-  btnSalvarConfiguracoes() {
+  btnSalvarConfiguracoes(showMessage = true) {
     if (!this.configuracoes || !this.configuracoes.ollama_api) { return; }
     this.ollamaChatService.setHost(this.configuracoes.ollama_api);
 
     this.configuracoesService.updateConfiguracao(this.defaultId, this.configuracoes).subscribe({
-      next: (res) => this.mensagensOverlayComponent?.show('Configurações Salvas', TipoMensagem.SUCESSO, 700),
-      error: (err) => this.mensagensOverlayComponent?.show('Erro ao salvar as configurações', TipoMensagem.ERRO, 1000),
+      next: (res) => {
+        if (!showMessage) { return; }
+        this.mensagensOverlayComponent?.show('Configurações Salvas', TipoMensagem.SUCESSO, 700);
+      },
+      error: (err) => {
+        if (!showMessage) { return; }
+        this.mensagensOverlayComponent?.show('Erro ao salvar as configurações', TipoMensagem.ERRO, 1000);
+      },
       complete: () => { }
     });
   }
@@ -125,8 +130,6 @@ export class ChatOllamaPageComponent {
     this.updateChatTxt(this.userPrompt);
     this.loadingChat();
 
-
-   
 
     let completeMethod = () => {
       this.mensagensOverlayComponent?.hide();
@@ -230,9 +233,13 @@ export class ChatOllamaPageComponent {
   }
   protected evtPollingStatus(status: StatusIndexacao): void {
     if (status.terminado === true) {
-      this.mensagensOverlayComponent?.show('Indexação Terminada', TipoMensagem.SUCESSO, 700);  
+      this.mensagensOverlayComponent?.show('Indexação Terminada', TipoMensagem.SUCESSO, 700);
     }
     //console.log('[evtPollingStatus]', status);
+  }
+
+  protected onchangeChkRag(): void {
+    this.btnSalvarConfiguracoes(false);
   }
   //#endregion
 

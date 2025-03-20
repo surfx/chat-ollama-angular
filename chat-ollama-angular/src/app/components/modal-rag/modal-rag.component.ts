@@ -79,7 +79,6 @@ export class ModalRagComponent implements OnDestroy {
   protected indexar(): void {
 
     let txtUrlServico = document.getElementById('txtUrlServico') as HTMLInputElement;
-    let txtCollectionName = document.getElementById('txtCollectionName') as HTMLInputElement;
     let txtPathDocumentos = document.getElementById('txtPathDocumentos') as HTMLInputElement;
 
     if (!this.pythonRagService) {
@@ -96,11 +95,6 @@ export class ModalRagComponent implements OnDestroy {
       txtUrlServico && txtUrlServico.focus();
       return;
     }
-    if (!this.configuracoes.configuracoesRAG.urlServico) {
-      this.mensagemComponente?.show('Informe o nome da collection', TipoMensagem.ALERTA, 700);
-      !!txtCollectionName && txtCollectionName.focus();
-      return;
-    }
     if (!this.configuracoes.configuracoesRAG.pathDocumentos) {
       this.mensagemComponente?.show('Informe a pasta dos documentos', TipoMensagem.ALERTA, 700);
       !!txtPathDocumentos && txtPathDocumentos.focus();
@@ -114,9 +108,8 @@ export class ModalRagComponent implements OnDestroy {
     this.progressbarVisivel.set(true);
 
     this.pythonRagService.setHost(this.configuracoes.configuracoesRAG.urlServico);
-    this.pythonRagService.indexarChromaDB(
-      this.configuracoes.configuracoesRAG.pathDocumentos,
-      this.configuracoes.configuracoesRAG.collectionName
+    this.pythonRagService.indexarFaissdb(
+      this.configuracoes.configuracoesRAG.pathDocumentos
     ).subscribe({
       next: (res) => {
         this.mensagemComponente?.show('A indexação será feita em segundo plano', TipoMensagem.INFO, 1000);

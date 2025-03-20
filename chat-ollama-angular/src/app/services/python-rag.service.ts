@@ -18,8 +18,8 @@ export class PythonRagService {
   }
   constructor(private http: HttpClient) { }
 
-  public indexarChromaDB(data: string, collectionName: string): Observable<any> {
-    const url = `${this.apiUrl}indexarChromaDB?collection_name=${collectionName}`;
+  public indexarFaissdb(data: string): Observable<any> {
+    const url = `${this.apiUrl}indexarFaissdb`;
     const headers = new HttpHeaders({ 'Content-Type': 'text/plain' });
 
     return this.http.post(url, data, { headers });
@@ -30,8 +30,8 @@ export class PythonRagService {
     return this.http.get(url);
   }
 
-  public deleteCollection(collectionName: string): Observable<any> {
-    const url = `${this.apiUrl}deleteCollection?collection_name=${collectionName}`;
+  public deleteFaiss(): Observable<any> {
+    const url = `${this.apiUrl}deleteFaiss`;
     return this.http.delete(url);
   }
 

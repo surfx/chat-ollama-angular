@@ -1,3 +1,6 @@
+# cd E:\programas\ia\virtual_environment && my_env_3129\Scripts\activate
+# uv run "D:\meus_documentos\workspace\ia\chat-ollama-angular\rag-analise-yt\python\flask_server\server_flask_faiss.py"
+
 import sys
 import os
 
@@ -73,7 +76,6 @@ def delete_faiss():
 def status_service():
     return jsonify({"success": True, "message": "Serviço em execução"}), 200
 
-
 @app.route('/statusIndexacao', methods=['GET'])
 def status_indexacao_func():
     return jsonify(faissBatch.status_indexacao), 200
@@ -88,9 +90,8 @@ if __name__ == '__main__':
 # uv run "D:\meus_documentos\workspace\ia\chat-ollama-angular\rag-analise-yt\python\flask_server\server_flask_faiss.py"
 
 # curls
-#  curl -X POST -H "Content-Type: text/plain" -d "D:\meus_documentos\workspace\ia\chat-ollama-angular\data\pdfs" http://127.0.0.1:5000/indexarFaissdb
+#  curl -X POST -H "Content-Type: text/plain" -d "D:\meus_documentos\workspace\ia\chat-ollama-angular\data" http://127.0.0.1:5000/indexarFaissdb
 #  curl "http://127.0.0.1:5000/doQuestion?prompt=Como+jogar+monopoly+%3F"
 #  curl -X DELETE "http://127.0.0.1:5000/deleteFaiss"
-#  curl "http://127.0.0.1:5000/resetChroma"
 #  curl "http://127.0.0.1:5000/status"
 #  curl http://127.0.0.1:5000/statusIndexacao

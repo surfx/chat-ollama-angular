@@ -6,11 +6,11 @@
       "configuracoes": {
         "temperatura": 0.7,
         "modo": "generate",
-        "rag": false
+        "rag": true
       },
       "configuracoesRAG": {
         "collectionName": "local-rag",
-        "pathDocumentos": "D:\\meus_documentos\\workspace\\ia\\rag\\rag002\\data",
+        "pathDocumentos": "D:\\meus_documentos\\workspace\\ia\\chat-ollama-angular\\data",
         "urlServico": "http://127.0.0.1:5000/"
       }
     }

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Inicia o npm start
-cd /home/emerson/projetos/chat-ollama-angular/
+cd /home/emerson/projetos/chat-ollama-angular/chat-ollama-angular
 npm i
 npm start &
 

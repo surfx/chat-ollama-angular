@@ -312,8 +312,8 @@ class FaissBatch:
 
         documents_to_add = []
         ids_to_add = []
-        #embeddings_to_add = []
-        metadatas_to_add = []
+        # embeddings_to_add = []
+        # metadatas_to_add = []
 
         for i, chunk in enumerate(chunks):
             document_id = self.generate_id(chunk, i)
