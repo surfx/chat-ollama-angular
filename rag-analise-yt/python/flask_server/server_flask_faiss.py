@@ -1,4 +1,4 @@
-# cd E:\programas\ia\virtual_environment && my_env_3129\Scripts\activate
+# E: && cd E:\programas\ia\virtual_environment && my_env_3129\Scripts\activate
 # uv run "D:\meus_documentos\workspace\ia\chat-ollama-angular\rag-analise-yt\python\flask_server\server_flask_faiss.py"
 
 import sys
@@ -70,6 +70,7 @@ def do_question_llm():
 @app.route('/deleteFaiss', methods=['DELETE'])
 def delete_faiss():
     faissAuxiliar.excluir_faiss()
+    vectorstore = faissAuxiliar.get_vector_store()
     return jsonify({"success": True, "message": "Faiss deleted successfully"}), 200
 
 @app.route('/status', methods=['GET'])
@@ -86,7 +87,7 @@ if __name__ == '__main__':
 
 
 # Como executar
-# cd E:\programas\ia\virtual_environment && my_env_3129\Scripts\activate
+# E: && cd E:\programas\ia\virtual_environment && my_env_3129\Scripts\activate
 # uv run "D:\meus_documentos\workspace\ia\chat-ollama-angular\rag-analise-yt\python\flask_server\server_flask_faiss.py"
 
 # curls

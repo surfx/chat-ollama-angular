@@ -170,6 +170,17 @@ export class ModalRagComponent implements OnDestroy {
   }
   //#endregion
 
+  protected deletarFaiss(): void {
+    this.pythonRagService.deleteFaiss().subscribe({
+      next: (res) => {
+        this.mensagemComponente?.show('Faiss db excluído', TipoMensagem.INFO, 1000);
+      },
+      error: (err) => {
+        this.mensagemComponente?.show('Erro ao excluir o Faiss db', TipoMensagem.ERRO, 1000);
+      }
+    });
+  }
+
   // public onFileSelected(event: any): void {
   //   const files: FileList = event.target.files;
   //   if (!files || files.length <= 0) { return; }

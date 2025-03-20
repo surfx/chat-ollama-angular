@@ -1,13 +1,13 @@
 # RAG python FLASK
 
 Este projeto sobe um servidor Python Flask para indexar arquivos com [Docling](https://github.com/docling-project/docling)
-em uma base de dados vetorial [Chromadb](https://www.trychroma.com/) para posterior consulta RAG com LLMs servidos
+em uma base de dados vetorial [Faiss](https://ai.meta.com/tools/faiss/) para posterior consulta RAG com LLMs servidos
 pelo [Ollama](https://ollama.com/).
 
-O servidor Flask executa no endereço [http://127.0.0.1:5000](http://127.0.0.1:5000), arquivo `rag_python_chroma.py`
+O servidor Flask executa no endereço [http://127.0.0.1:5000](http://127.0.0.1:5000), arquivo `rag_python_faiss.py`
 
 Exemplo de indexação curl: 
-- `curl -X POST -H "Content-Type: text/plain" -d "D:\meus_documentos\workspace\ia\chat-ollama-angular\rag-analise-yt\data" http://127.0.0.1:5000/indexarChromaDB?collection_name=local-rag`
+- `curl -X POST -H "Content-Type: text/plain" -d "D:\meus_documentos\workspace\ia\chat-ollama-angular\data" http://127.0.0.1:5000/indexarFaissdb`
 
 Para mais informações veja a seção `Curls` > `Indexar`.
 
@@ -92,7 +92,7 @@ Obs<sup>2</sup>: talvez precise habilitar o `mklink` no Windows.
 
 ## tesserocr
 
-O `tesserocr` é utilizado para fazer o OCR das imagens e posterior indexação no [Chromadb](https://www.trychroma.com/)
+O `tesserocr` é utilizado para fazer o OCR das imagens e posterior indexação no [Faiss](https://ai.meta.com/tools/faiss/)
 
 - [tesserocr-windows_build](https://github.com/simonflueckiger/tesserocr-windows_build)
 - [tesserocr-windows_build releases](https://github.com/simonflueckiger/tesserocr-windows_build/releases)
@@ -120,32 +120,33 @@ Adicione ao Windows PATH:
 - TESSDATA_PREFIX : E:\programas\ia\Tesseract-OCR\tessdata
 
 
-## Chromadb
+## ~~Chromadb~~
 
-Como servidor
+~~Como servidor~~
 
-- [http://localhost:8000/](http://localhost:8000/)
+- ~~[http://localhost:8000/](http://localhost:8000/)~~
 
-```bash
-chroma run --host localhost --port 8000 --path ./my_chroma_data
-```
+~~chroma run --host localhost --port 8000 --path ./my_chroma_data~~
 
-Atualmente o projeto salva os dados diretamente no disco com:
 
-`chromadb.PersistentClient(path=persist_directory, settings=Settings(allow_reset=True))`
+~~Atualmente o projeto salva os dados diretamente no disco com:~~
 
-Para mais informações veja o arquivo: `rag_python_chroma.py`
+~~`chromadb.PersistentClient(path=persist_directory, settings=Settings(allow_reset=True))`~~
 
+~~Para mais informações veja o arquivo: `rag_python_faiss.py`~~
 
 ## Ollama
 
 ```bash
 curl -fsSL https://ollama.com/install.sh | sh
 ollama serve
-ollama pull nomic-embed-text
-ollama run llama3.2
-ollama run deepseek-r1
+```
+
+```bash
 ollama pull gemma3:27b
+ollama pull deepseek-r1:32b
+ollama pull llama3.2:3b
+ollama pull nomic-embed-text
 ```
 
 Após a instalação do Ollama, execute com: `ollama serve`
@@ -156,11 +157,11 @@ Com o Ollama executando, instale os modelos com pull (ou run para instalar e tes
 
 # Flask Rag
 
-Para subir um servidor flask, execute o arquivo `rag_python_chroma.py`
+Para subir um servidor flask, execute o arquivo `rag_python_faiss.py`
 
 ```bash
 cd E:\programas\ia\virtual_environment && my_env_3129\Scripts\activate
-uv run D:\meus_documentos\workspace\ia\chat-ollama-angular\rag-analise-yt\python\rag_python_chroma.py
+uv run D:\meus_documentos\workspace\ia\chat-ollama-angular\rag-analise-yt\python\rag_python_faiss.py
 ```
 
 ![uv rag python](readme_imagens/uv_rag_python.png)
@@ -178,20 +179,19 @@ Obs<sup>2</sup>: verifique os PATHS e configurações específicas do seu SO
 
 ### Indexar
 
-Para indexar os arquivos no [Chromadb](https://www.trychroma.com/):
+Para indexar os arquivos no [Faiss](https://ai.meta.com/tools/faiss/):
 
-| Variável | Valor                                                 |
-| -------- | ----------------------------------------------------- |
-| Pasta    | D:\\meus_documentos\\workspace\\ia\\rag\\rag002\\data |
-| Coleção  | local-rag                                             |
+| Variável | Valor                                                          |
+| -------- | -------------------------------------------------------------- |
+| Pasta    | D:\\meus_documentos\\workspace\\ia\\chat-ollama-angular\\data  |
 
-`curl -X POST -H "Content-Type: text/plain" -d "D:\meus_documentos\workspace\ia\chat-ollama-angular\rag-analise-yt\data" http://127.0.0.1:5000/indexarChromaDB?collection_name=local-rag`
+`curl -X POST -H "Content-Type: text/plain" -d "D:\meus_documentos\workspace\ia\chat-ollama-angular\data" http://127.0.0.1:5000/indexarFaissdb`
 
-Todos arquivos que estiverem no diretório (e subdiretórios) informado serão indexados no [Chromadb](https://www.trychroma.com/) na pasta: 
+Todos arquivos que estiverem no diretório (e subdiretórios) informado serão indexados no [Faiss](https://ai.meta.com/tools/faiss/) na pasta: 
 
-- `persist_directory = r"D:\meus_documentos\workspace\ia\rag\rag002\chroma\chroma_db"`
+- `persist_directory = r"D:\meus_documentos\workspace\ia\chat-ollama-angular\db\faiss_db"`
 
-Para alterar essa pasta, modifique o arquivo `rag_python_chroma.py`
+Para alterar essa pasta, modifique o arquivo `rag_python_faiss.py`
 
 ### Consulta RAG
 
@@ -205,28 +205,25 @@ Para o exemplo, previamente indexei um arquivo pdf com informações sobre o jog
 
 A resposta segue o padrão readme dos modelos de llm.
 
-### deleteCollection e resetChroma
+### Delete Faiss
 
-Excluir coleção (exclui, porém não limpa os embeddings):
+Excluir Faiss db:
 
-`curl -X DELETE "http://127.0.0.1:5000/deleteCollection?collection_name=local-rag"`
-
-Resetar o chroma (não funcional):
-
-`curl "http://127.0.0.1:5000/resetChroma"`
+`curl -X DELETE "http://127.0.0.1:5000/deleteFaiss"`
 
 # Notebooks
 
-Os notebooks ipynb `notebook001.ipynb`, `notebook002.ipynb` e `notebook003.ipynb` servem de base para estudo, referência, melhora e testes dos métodos do arquivo `rag_python_chroma.py`, utilizando o Chromadb.
+Os notebooks ipynb `notebook001.ipynb`, `notebook002.ipynb` e `notebook003.ipynb` servem de base para estudo, referência, melhora e testes dos métodos do arquivo `rag_python_faiss.py`, utilizando o Chromadb.
 
 Devido ao tamanho dos arquivos gerados pelo Chromadb, falha nos métodos de `delete_collection` e `reset`, optou-se pelo uso do banco de dados vetorial [Faiss](https://ai.meta.com/tools/faiss/). Os notebooks ipynb `faiss001.ipynb`, `faiss002.ipynb` e `faiss003.ipynb` servem de base para estudo e referência.
 
 # TODO
 
 - [ ] utilizar o `tesserocr` para fazer o OCR das imagens dos PDFs
-- [ ] Integrar o servidor Flask RAG com o projeto [chat ollama angular](https://github.com/surfx/chat-ollama-angular).
+- [x] Integrar o servidor Flask RAG com o projeto [chat ollama angular](https://github.com/surfx/chat-ollama-angular).
 - [ ] Alterar o projeto [rag-analise-yt](https://github.com/surfx/rag-analise-yt) na indexação - receber um conjunto de arquivos via POST
 - [x] Criar GET para is alive
+- [ ] Parametrizar o serviço
 
 # Créditos
 
@@ -248,4 +245,4 @@ Quero agradecer à [Tony Kipkemboi](https://www.youtube.com/@tonykipkemboi) e se
 - [uv](https://docs.astral.sh/uv/)
 - [chat ollama angular](https://github.com/surfx/chat-ollama-angular)
 - [Docling](https://github.com/docling-project/docling)
-- [Chromadb](https://www.trychroma.com/)
+- [Faiss](https://ai.meta.com/tools/faiss/)
