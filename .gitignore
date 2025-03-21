@@ -42,6 +42,7 @@ testem.log
 Thumbs.db
 
 # arquivos para RAG
-data/
 rag-analise-yt/python/__pycache__/rag_python_faiss.cpython-312.pyc
+rag-analise-yt/python/__pycache__/rag_python_faiss.cpython-313.pyc
+data/
 db/

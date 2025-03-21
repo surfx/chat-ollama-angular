@@ -8,6 +8,7 @@ LANG = "por" # por | eng
 persist_directory = r"D:\meus_documentos\workspace\ia\rag\rag002\db\faiss_db"
 local_model = "deepseek-r1" # deepseek-r1 | llama3.2
 embedding_model_name = 'nomic-embed-text' # nomic-embed-text | llama3
+extensoes_imagens = ['.jpg', '.jpeg', '.png', '.gif', '.bmp'] # Adicione outras extensões se necessário
 
 import os
 import faiss
@@ -99,11 +100,13 @@ from docling.datamodel.settings import settings
 class DoclingAuxiliar:
 
     IMAGE_RESOLUTION_SCALE = 2.0
+    doc_converter = None
 
     def __init__(self):
         pass
 
     def get_doc_converter(self):
+        if (self.doc_converter is not None): return self.doc_converter
         # Define pipeline options for PDF processing
         pipeline_options = PdfPipelineOptions(
             do_table_structure=True,  # Enable table structure detection
@@ -122,12 +125,31 @@ class DoclingAuxiliar:
         )
 
         # Initialize the DocumentConverter with the specified pipeline options
-        doc_converter_global = DocumentConverter(
+        self.doc_converter = DocumentConverter(
             format_options={
                 InputFormat.PDF: PdfFormatOption(pipeline_options=pipeline_options)
             }
         )
-        return doc_converter_global
+        return self.doc_converter
+
+    def convert_file(self, file, path_temporario):
+        if (file is None or path_temporario is None): return None
+        if (self.doc_converter is None): self.doc_converter = self.get_doc_converter()
+        if (self.doc_converter is None): return None
+        filename = file.filename
+        filepath = os.path.join(path_temporario, filename)
+        file.save(filepath)
+
+        try:
+            return self.doc_converter.convert(filepath)
+        except Exception as e:
+            print(f"Erro ao converter com arquivo temporário: {e}")
+        finally:
+            try:
+                os.remove(filepath)
+            except Exception as e:
+                print(f"Erro ao deletar arquivo '{filename}': {e}")
+        return None
 
 # DoclingAuxiliar().get_doc_converter()
 #endregion
@@ -152,8 +174,6 @@ class SepararDocumentos:
 
         imagens = []
         documentos = []
-
-        extensoes_imagens = ['.jpg', '.jpeg', '.png', '.gif', '.bmp']  # Adicione outras extensões se necessário
 
         for raiz, subpastas, arquivos in os.walk(diretorio):
             for arquivo in arquivos:
@@ -193,25 +213,66 @@ from PIL import Image
 
 class ChunksAux:
 
+    docling_aux = DoclingAuxiliar()
+
     # DoclingAuxiliar().get_doc_converter()
     def __init__(self, doc_converter_global = None):
         self.text_splitter = RecursiveCharacterTextSplitter(chunk_size=7500, chunk_overlap=100)
-        self.doc_converter_global = doc_converter_global if doc_converter_global is not None else DoclingAuxiliar().get_doc_converter()
+        self.doc_converter_global = doc_converter_global if doc_converter_global is not None else self.docling_aux.get_doc_converter()
 
     #local_path = r"data\pdfs\monopoly.pdf"
     def get_chunks_doc(self, local_path):
+        if (local_path is None): return None
         result = self.doc_converter_global.convert(Path(local_path))
         documento = Document(page_content=result.document.export_to_markdown(image_mode=ImageRefMode.EMBEDDED), metadata={"source": local_path})
         chunks = self.text_splitter.split_documents([documento])
         return chunks
 
+    def get_chunks_doc_file(self, file, path_temporario):
+        if (file is None or path_temporario is None): return None
+        result = self.docling_aux.convert_file(file, path_temporario)
+
+        filepath = os.path.join(path_temporario, file.filename)
+        documento = Document(page_content=result.document.export_to_markdown(image_mode=ImageRefMode.EMBEDDED), metadata={"source": filepath})
+        chunks = self.text_splitter.split_documents([documento])
+        return chunks
+
     def get_chunks_image(self, local_path):
+        if (local_path is None): return None
         image = Image.open(local_path)
         extracted_text = pytesseract.image_to_string(image, lang=LANG)
 
         documento = Document(page_content=extracted_text, metadata={"source": local_path})
         chunks = self.text_splitter.split_documents([documento])
         return chunks
+    
+    def get_chunks_image_file(self, file, path_temporario, lang=LANG):
+        if (file is None or path_temporario is None): return None
+        filename = file.filename
+        filepath = os.path.join(path_temporario, filename)
+        file.save(filepath)
+
+        try:
+            extracted_text = pytesseract.image_to_string(filepath, lang=lang)
+            documento = Document(page_content=extracted_text, metadata={"source": filepath})
+            chunks = self.text_splitter.split_documents([documento])
+            return chunks
+        except Exception as e:
+            print(f"Erro ao converter com arquivo temporário: {e}")
+        finally:
+            try:
+                os.remove(filepath)
+            except Exception as e:
+                print(f"Erro ao deletar arquivo '{filename}': {e}")
+        return None
+
+    def get_chunks_file(self, file, path_temporario, lang=LANG):
+        _, extensao = os.path.splitext(file.filename)
+        print(extensao)
+        print(extensao in extensoes_imagens)
+        return None
+
+
 
 import hashlib
 import os

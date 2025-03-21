@@ -84,6 +84,8 @@ def status_indexacao_func():
 # -----------------------------
 # TESTE UPLOAD
 # -----------------------------
+import tempfile
+
 UPLOAD_FOLDER = r"D:\meus_documentos\workspace\ia\chat-ollama-angular\rag-analise-yt\uploads_temp"  # Pasta onde os arquivos serão salvos no servidor
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'html'} # Extensões permitidas (opcional)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -94,25 +96,63 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+docling_aux = rpf.DoclingAuxiliar()
+doc_converter = docling_aux.get_doc_converter()
+
+# ---------- img
+import pytesseract
+from PIL import Image
+
+chunksAux = rpf.ChunksAux()
+
 @app.route('/upload', methods=['POST'])
 def upload_file():
     if 'files' not in request.files:
         return jsonify({'message': 'Nenhum arquivo enviado'}), 400
 
-    files = request.files.getlist('files') # Pega a lista de arquivos enviados com o nome 'files'
+    files = request.files.getlist('files')
     filenames = []
 
-    for file in files:
-        if file.filename == '':
-            return jsonify({'message': 'Um ou mais arquivos sem nome'}), 400
+    # for file in files:
+    #     if file.filename == '':
+    #         return jsonify({'message': 'Um ou mais arquivos sem nome'}), 400
 
-        # Opcional: verificar extensão se allowed_file estiver implementado
-        # if file and allowed_file(file.filename):
-        if file:
-            filename = file.filename # Você pode querer gerar um nome único aqui
-            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            file.save(filepath)
-            filenames.append(filename)
+    #     # Opcional: verificar extensão se allowed_file estiver implementado
+    #     # if file and allowed_file(file.filename):
+    #     # if file:
+    #     #     filename = file.filename
+    #     #     filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    #     #     file.save(filepath)
+    #     #     filenames.append(filename)
+
+    #     # TODO: passar para o docling
+
+    path_temporario = UPLOAD_FOLDER
+
+    file = files[0]
+    #res = docling_aux.convert_file(file, UPLOAD_FOLDER) print(res)
+
+    #chunks = chunksAux.get_chunks_doc_file(file, path_temporario)
+    #print(chunks[0])
+    print(chunksAux.get_chunks_file(file, path_temporario))
+
+    # filename = file.filename
+    # filepath = os.path.join(path_temporario, filename)
+    # file.save(filepath)
+
+    # try:
+    #     extracted_text = pytesseract.image_to_string(filepath, lang='por')
+    #     print(extracted_text)
+    # except Exception as e:
+    #     print(f"Erro ao converter com arquivo temporário: {e}")
+    # finally:
+    #     try:
+    #         os.remove(filepath)
+    #     except Exception as e:
+    #         print(f"Erro ao deletar arquivo '{filename}': {e}")
+
+
+
 
     return jsonify({'message': 'Arquivos enviados com sucesso', 'filenames': filenames}), 201
 
