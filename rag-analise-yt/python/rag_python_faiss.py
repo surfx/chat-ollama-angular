@@ -2,10 +2,11 @@
 # cd E:\programas\ia\virtual_environment && my_env_3129\Scripts\activate
 # uv run D:\meus_documentos\workspace\ia\chat-ollama-angular\rag-analise-yt\python\rag_python_faiss.py
 
+# DELETAR PATH_ARQUIVOS
 PATH_ARQUIVOS = r"D:\meus_documentos\workspace\ia\chat-ollama-angular\rag-analise-yt\data"
 LANG = "por" # por | eng
 # Diretório onde o banco de dados será salvo
-persist_directory = r"D:\meus_documentos\workspace\ia\rag\rag002\db\faiss_db"
+persist_directory = r"/home/emerson/projetos/chat-ollama-angular/db"
 local_model = "deepseek-r1" # deepseek-r1 | llama3.2
 embedding_model_name = 'nomic-embed-text' # nomic-embed-text | llama3
 extensoes_imagens = ['.jpg', '.jpeg', '.png', '.gif', '.bmp'] # Adicione outras extensões se necessário
@@ -132,23 +133,20 @@ class DoclingAuxiliar:
         )
         return self.doc_converter
 
-    def convert_file(self, file, path_temporario):
-        if (file is None or path_temporario is None): return None
+    def convert_file(self, caminho_arquivo):
+        if (caminho_arquivo is None): return None
         if (self.doc_converter is None): self.doc_converter = self.get_doc_converter()
         if (self.doc_converter is None): return None
-        filename = file.filename
-        filepath = os.path.join(path_temporario, filename)
-        file.save(filepath)
 
         try:
-            return self.doc_converter.convert(filepath)
+            return self.doc_converter.convert(caminho_arquivo)
         except Exception as e:
             print(f"Erro ao converter com arquivo temporário: {e}")
         finally:
             try:
-                os.remove(filepath)
+                if os.path.exists: os.remove(caminho_arquivo)
             except Exception as e:
-                print(f"Erro ao deletar arquivo '{filename}': {e}")
+                print(f"Erro ao deletar arquivo '{caminho_arquivo}': {e}")
         return None
 
 # DoclingAuxiliar().get_doc_converter()
@@ -228,12 +226,10 @@ class ChunksAux:
         chunks = self.text_splitter.split_documents([documento])
         return chunks
 
-    def get_chunks_doc_file(self, file, path_temporario):
-        if (file is None or path_temporario is None): return None
-        result = self.docling_aux.convert_file(file, path_temporario)
-
-        filepath = os.path.join(path_temporario, file.filename)
-        documento = Document(page_content=result.document.export_to_markdown(image_mode=ImageRefMode.EMBEDDED), metadata={"source": filepath})
+    def get_chunks_doc_file(self, caminho_arquivo):
+        if (caminho_arquivo is None or not os.path.exists(caminho_arquivo)): return None
+        result = self.docling_aux.convert_file(caminho_arquivo)
+        documento = Document(page_content=result.document.export_to_markdown(image_mode=ImageRefMode.EMBEDDED), metadata={"source": caminho_arquivo})
         chunks = self.text_splitter.split_documents([documento])
         return chunks
 
@@ -246,31 +242,28 @@ class ChunksAux:
         chunks = self.text_splitter.split_documents([documento])
         return chunks
     
-    def get_chunks_image_file(self, file, path_temporario, lang=LANG):
-        if (file is None or path_temporario is None): return None
-        filename = file.filename
-        filepath = os.path.join(path_temporario, filename)
-        file.save(filepath)
+    def get_chunks_image_file(self, caminho_arquivo, lang=LANG):
+        if (caminho_arquivo is None or not os.path.exists(caminho_arquivo)): return None
 
         try:
-            extracted_text = pytesseract.image_to_string(filepath, lang=lang)
-            documento = Document(page_content=extracted_text, metadata={"source": filepath})
+            extracted_text = pytesseract.image_to_string(caminho_arquivo, lang=lang)
+            documento = Document(page_content=extracted_text, metadata={"source": caminho_arquivo})
             chunks = self.text_splitter.split_documents([documento])
             return chunks
         except Exception as e:
             print(f"Erro ao converter com arquivo temporário: {e}")
         finally:
             try:
-                os.remove(filepath)
+                os.remove(caminho_arquivo)
             except Exception as e:
-                print(f"Erro ao deletar arquivo '{filename}': {e}")
+                print(f"Erro ao deletar arquivo '{caminho_arquivo}': {e}")
         return None
 
-    def get_chunks_file(self, file, path_temporario, lang=LANG):
-        _, extensao = os.path.splitext(file.filename)
-        print(extensao)
-        print(extensao in extensoes_imagens)
-        return None
+    def get_chunks_file(self, caminho_arquivo, lang=LANG):
+        _, extensao = os.path.splitext(caminho_arquivo)
+        return self.get_chunks_image_file(caminho_arquivo, lang) \
+                if extensao in extensoes_imagens else \
+                self.get_chunks_doc_file(caminho_arquivo)
 
 
 
@@ -362,7 +355,37 @@ class FaissBatch:
         self.status_indexacao["porcentagem"] = 100
         self.status_indexacao["terminado"] = True
         return self.vectorstore
-        
+    
+    def faiss_indexing_files(self, lista_caminhos_arquivos):
+        if (lista_caminhos_arquivos is None or len(lista_caminhos_arquivos) <= 0): return self.vectorstore
+
+        total_arquivos = len(lista_caminhos_arquivos)
+        arquivos_processados = 0
+
+        for caminho_arquivo in lista_caminhos_arquivos:
+            filename = os.path.basename(caminho_arquivo) if caminho_arquivo != '' else ''
+            if caminho_arquivo == '' or filename == '': continue
+            filename = filename.lower()
+            id_aux = self.generate_id_filename(filename, 0)
+            results = self.vectorstore.get_by_ids([id_aux]);
+
+            if results and results[0].id and id_aux in results[0].id:
+                print(f"Documento com ID {id_aux} | {filename} já existe na coleção.")
+                if os.path.exists(caminho_arquivo): os.remove(caminho_arquivo)
+
+                arquivos_processados += 1
+                self.status_indexacao["porcentagem"] = int((arquivos_processados / total_arquivos) * 100)
+                continue
+
+            self.faiss_indexing_batch(self.chunkAux.get_chunks_file(caminho_arquivo))
+            arquivos_processados += 1
+            self.status_indexacao["porcentagem"] = int((arquivos_processados / total_arquivos) * 100)
+            if os.path.exists(caminho_arquivo): os.remove(caminho_arquivo)
+
+        self.status_indexacao["porcentagem"] = 100
+        self.status_indexacao["terminado"] = True
+        return self.vectorstore
+
 
     def faiss_indexing_batch(self, chunks):
         """Indexa chunks em lote no FAISS db."""

@@ -46,6 +46,8 @@ uv pip install -U unstructured langchain langchain-community langchain_ollama la
 uv pip install -U pytesseract flask flask-cors
 ```
 
+Linux: `uv pip install -U tesserocr`
+
 ## 4. tesserocr (Windows)
 
 O `tesserocr` é utilizado para fazer o OCR das imagens e posterior indexação no [Faiss](https://ai.meta.com/tools/faiss/)
@@ -74,6 +76,8 @@ Faça o download de [tessdata](https://github.com/tesseract-ocr/tessdata/archive
 Adicione ao Windows PATH:
 
 - TESSDATA_PREFIX : E:\programas\ia\Tesseract-OCR\tessdata
+
+Para o Linux: `export TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata`
 
 # Iniciar
 

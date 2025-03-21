@@ -59,7 +59,29 @@ Instale o [vs_BuildTools.exe](https://visualstudio.microsoft.com/pt-br/visual-cp
 
 Este foi configurado para uma pasta diferente do projeto (E:\programas\ia\virtual_environment), neste caso para o notebook encontrar o venv (vscode) aponte para: `"E:\programas\ia\virtual_environment\my_env_3129\Scripts\python.exe"`
 
+### Linux
+
 ```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+uv python install 3.12.9
+path_environments="/tmp/uv_environments"
+mkdir "$path_environments"; cd "$path_environments"
+uv venv --python 3.12.9 my_env_3129
+source my_env_3129/bin/activate
+uv pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu126
+uv pip install -U ipykernel tqdm numpy sympy chromadb protobuf==3.20.3 docling
+uv pip install -U unstructured langchain langchain-community langchain_ollama langchain-ollama langchain_chroma "unstructured[all-docs]" ipywidgets
+uv pip install -U pytesseract flask flask-cors
+uv pip install -qU faiss-cpu
+# uv pip install -qU faiss-gpu - nok
+uv pip install -U tesserocr
+
+export TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata
+```
+
+### Windows
+
+```pwsh
 powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
 uv python install 3.12.9
 cd E:\programas\ia\virtual_environment
@@ -75,7 +97,7 @@ uv pip install -U pytesseract flask flask-cors
 
 Para o windows CUDA 12 foi usado: `uv pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu126`
 
-### link simbolico (opcional)
+#### link simbolico (opcional - windows)
 
 No cmd execute ([mklink](https://learn.microsoft.com/pt-br/windows-server/administration/windows-commands/mklink)):
 
@@ -94,22 +116,34 @@ Obs<sup>2</sup>: talvez precise habilitar o `mklink` no Windows.
 
 O `tesserocr` é utilizado para fazer o OCR das imagens e posterior indexação no [Faiss](https://ai.meta.com/tools/faiss/)
 
+### Linux
+
+```bash
+sudo apt install tesseract-ocr -y
+sudo apt install libtesseract-dev -y
+sudo apt-get install tesseract-ocr-por -y
+tesseract --version
+tesseract --list-langs
+```
+
+### Windows
+
 - [tesserocr-windows_build](https://github.com/simonflueckiger/tesserocr-windows_build)
 - [tesserocr-windows_build releases](https://github.com/simonflueckiger/tesserocr-windows_build/releases)
 
-```bash
+```pwsh
 cd E:\programas\ia\virtual_environment
 my_env_3129\Scripts\activate
 uv pip install https://github.com/simonflueckiger/tesserocr-windows_build/releases/download/tesserocr-v2.8.0-tesseract-5.5.0/tesserocr-2.8.0-cp312-cp312-win_amd64.whl
 ```
 
-### tesseract releases
+#### tesseract releases
 
 [tesseract releases](https://github.com/tesseract-ocr/tesseract/releases)
 
 descompactar e adicione ao PATH do Windows: `E:\programas\ia\Tesseract-OCR\tessdata`
 
-### tessdata
+#### tessdata
 
 [tessdata github](https://github.com/tesseract-ocr/tessdata)
 
@@ -135,6 +169,8 @@ Adicione ao Windows PATH:
 
 ~~Para mais informações veja o arquivo: `rag_python_faiss.py`~~
 
+Devido aos antigos problemas não corrigidos do Chromadb, este foi removido do projeto. Sendo substituído pelo [Faiss](https://ai.meta.com/tools/faiss/).
+
 ## Ollama
 
 ```bash
@@ -159,7 +195,17 @@ Com o Ollama executando, instale os modelos com pull (ou run para instalar e tes
 
 Para subir um servidor flask, execute o arquivo `rag_python_faiss.py`
 
+## Linux
+
 ```bash
+path_environments="/tmp/uv_environments"; cd "$path_environments"
+source my_env_3129/bin/activate
+uv run /home/emerson/projetos/chat-ollama-angular/rag-analise-yt/python/flask_server/server_flask_faiss.py
+```
+
+## Windows
+
+```pwsh
 cd E:\programas\ia\virtual_environment && my_env_3129\Scripts\activate
 uv run D:\meus_documentos\workspace\ia\chat-ollama-angular\rag-analise-yt\python\rag_python_faiss.py
 ```
@@ -177,7 +223,7 @@ Obs<sup>1</sup>: precisa do servidor ollama executando `ollama serve`
 
 Obs<sup>2</sup>: verifique os PATHS e configurações específicas do seu SO
 
-### Indexar
+### Indexar (Windows)
 
 Para indexar os arquivos no [Faiss](https://ai.meta.com/tools/faiss/):
 

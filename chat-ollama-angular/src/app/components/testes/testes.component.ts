@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { HttpClient, HttpEventType } from '@angular/common/http';
 import { Component } from '@angular/core';
-import { OllamaChatService } from '../../services/ollama-chat.service';
+import { PythonRagService } from '../../services/python-rag.service';
 
 
 @Component({
@@ -16,7 +15,7 @@ export class TestesComponent {
   isDragging = false;
   uploadProgress = 0;
 
-  constructor(private ollamaChatService: OllamaChatService, private http: HttpClient) {
+  constructor(private pythonRagService: PythonRagService) {
 
   }
 
@@ -65,40 +64,30 @@ export class TestesComponent {
   }
 
   onUpload(): void {
-    if (this.files.length > 0) {
-      const formData = new FormData();
-      for (const file of this.files) {
-        formData.append('files', file); // 'files' deve corresponder à chave esperada no Flask (request.files.getlist('files'))
-      }
-
-      this.uploadProgress = 0;
-
-      this.http.post<any>('http://127.0.0.1:5000/upload', formData, {
-        reportProgress: true,
-        observe: 'events'
-      })
-        .subscribe({
-          next: (event) => {
-            if (event.type === HttpEventType.UploadProgress) {
-              if (event.total) {
-                this.uploadProgress = Math.round((100 * event.loaded) / event.total);
-                console.log(`Progresso do Upload: ${this.uploadProgress}%`);
-              }
-            } else if (event.type === HttpEventType.Response) {
-              console.log('Upload Completo!', event.body);
-              this.files = [];
-              this.uploadProgress = 0;
-            }
-          },
-          error: (err) => {
-            console.error('Erro no Upload:', err);
-            this.uploadProgress = 0;
-          },
-          complete: () => { }
-        });
-    } else {
+    if (this.files.length <= 0) {
       console.log("Nenhum arquivo selecionado para enviar.");
     }
+
+    this.pythonRagService.uploadFilesRag(this.files).subscribe({
+      next: (response) => {
+        if (!response){
+          console.error('Erro ao realizar o upload dos arquivos para análise RAG', response);
+          return;
+        }
+        console.log(response);
+        this.uploadProgress = response.porcentagem;
+        console.log('this.uploadProgress: ', this.uploadProgress);
+        if (this.uploadProgress >= 100) {
+          this.files = [];
+        }
+      },
+      error: (err) => {
+        console.error('Erro no Upload:', err);
+        this.uploadProgress = 0;
+
+      }
+    });
+
   }
 
   onClearFiles(): void {

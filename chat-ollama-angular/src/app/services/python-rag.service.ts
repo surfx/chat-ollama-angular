@@ -1,7 +1,7 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpEventType, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { interval, Observable } from 'rxjs';
-import { switchMap, takeWhile, tap } from 'rxjs/operators';
+import { interval, Observable, of, EMPTY } from 'rxjs';
+import { catchError, filter, map, switchMap, takeWhile, tap } from 'rxjs/operators';
 import { StatusIndexacao } from '../model/modelos';
 
 @Injectable({
@@ -56,6 +56,40 @@ export class PythonRagService {
       switchMap(() => this.statusIndexacao()),
       takeWhile(status => !(status.terminado === true || status.porcentagem >= 100), true),
       tap(status => console.log('Status da Indexação:', status))
+    );
+  }
+  //#endregion
+
+  //#region upload files RAG
+  public uploadFilesRag(files: File[]): Observable<{response: any, porcentagem: number}> {
+    if (!files || files.length <= 0) return EMPTY; // of(0)
+    const url = `${this.apiUrl}upload`;
+
+    const formData = new FormData();
+    for (const file of files) {
+      formData.append('files', file); // 'files' deve corresponder à chave esperada no Flask (request.files.getlist('files'))
+    }
+
+    return this.http.post<any>(url, formData, {
+      reportProgress: true,
+      observe: 'events'
+    }).pipe(
+      filter(event => event.type === HttpEventType.UploadProgress || event.type === HttpEventType.Response),
+      map(event => {
+        if (event.type === HttpEventType.UploadProgress) {
+          if (event.total) {
+            const porcentagem = Math.round((100 * event.loaded) / event.total);
+            return { response: event, porcentagem: porcentagem };
+          }
+        } else if (event.type === HttpEventType.Response) {
+          return { response: event, porcentagem: 100 };
+        }
+        return { response: event, porcentagem: 0 };
+      }),
+      catchError(error => {
+        console.error('Erro no upload:', error);
+        return of({ response: undefined, porcentagem: 0 });
+      })
     );
   }
   //#endregion

@@ -3,6 +3,7 @@
 
 import sys
 import os
+import functools
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
@@ -12,7 +13,7 @@ import rag_python_faiss as rpf
 
 LANG = "por" # por | eng
 # Diretório onde o banco de dados será salvo
-persist_directory = r"D:\meus_documentos\workspace\ia\chat-ollama-angular\db\faiss_db"
+persist_directory = r"/home/emerson/projetos/chat-ollama-angular/db"
 local_model = "deepseek-r1" # deepseek-r1 | llama3.2
 embedding_model_name = 'nomic-embed-text' # nomic-embed-text | llama3
 
@@ -35,6 +36,21 @@ faissBatch = rpf.FaissBatch(vectorstore=vectorstore)
 def funcao_callback(future):
     try:
         vectorstore = future.result()
+        if vectorstore is None: return
+        faissAuxiliar.persistir(vectorstore)
+        print(f"Callback: Tarefa concluída com resultado: {vectorstore}")
+    except Exception as e:
+        print(f"Callback: Tarefa terminou com erro: {e}")
+    finally:
+        print("Callback: Ação pós-tarefa executada.")
+
+def funcao_callback_arquivos(future, caminhos_arquivos):
+    try:
+        for caminho_arquivo in caminhos_arquivos:
+            if os.path.exists(caminho_arquivo): os.remove(caminho_arquivo)
+
+        vectorstore = future.result()
+        if vectorstore is None: return
         faissAuxiliar.persistir(vectorstore)
         print(f"Callback: Tarefa concluída com resultado: {vectorstore}")
     except Exception as e:
@@ -84,11 +100,8 @@ def status_indexacao_func():
 # -----------------------------
 # TESTE UPLOAD
 # -----------------------------
-import tempfile
-
-UPLOAD_FOLDER = r"D:\meus_documentos\workspace\ia\chat-ollama-angular\rag-analise-yt\uploads_temp"  # Pasta onde os arquivos serão salvos no servidor
+UPLOAD_FOLDER = r"/home/emerson/projetos/chat-ollama-angular/temp"  # Pasta onde os arquivos serão salvos no servidor
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'html'} # Extensões permitidas (opcional)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # Certifique-se de que a pasta de uploads exista
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -99,62 +112,39 @@ def allowed_file(filename):
 docling_aux = rpf.DoclingAuxiliar()
 doc_converter = docling_aux.get_doc_converter()
 
-# ---------- img
-import pytesseract
-from PIL import Image
-
 chunksAux = rpf.ChunksAux()
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
     if 'files' not in request.files:
-        return jsonify({'message': 'Nenhum arquivo enviado'}), 400
+        return jsonify({"success": False, "message": "Nenhum arquivo enviado"}), 400
 
     files = request.files.getlist('files')
-    filenames = []
+    for file in files:
+        if file.filename == '': return jsonify({"success": False, "message": "Um ou mais arquivos sem nome"}), 400
 
-    # for file in files:
-    #     if file.filename == '':
-    #         return jsonify({'message': 'Um ou mais arquivos sem nome'}), 400
+    lista_caminhos_arquivos = salvar_arquivos_temp(files, UPLOAD_FOLDER)
+    if (lista_caminhos_arquivos is None or len(lista_caminhos_arquivos) <= 0):
+        return jsonify({"success": False, "message": "Sem arquivos válidos para indexação"}), 200
 
-    #     # Opcional: verificar extensão se allowed_file estiver implementado
-    #     # if file and allowed_file(file.filename):
-    #     # if file:
-    #     #     filename = file.filename
-    #     #     filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-    #     #     file.save(filepath)
-    #     #     filenames.append(filename)
+    callback_com_args = functools.partial(funcao_callback_arquivos, caminhos_arquivos=lista_caminhos_arquivos)
+    future_indexacao = executor.submit(faissBatch.faiss_indexing_files, lista_caminhos_arquivos)
+    future_indexacao.add_done_callback(callback_com_args)
 
-    #     # TODO: passar para o docling
+    return jsonify({"success": True, "message": "Indexação iniciada em segundo plano."}), 200
 
-    path_temporario = UPLOAD_FOLDER
+def salvar_arquivos_temp(files, path_temporario = UPLOAD_FOLDER):
+    arquivos_salvos = []
+    if files is None or path_temporario is None: return None
 
-    file = files[0]
-    #res = docling_aux.convert_file(file, UPLOAD_FOLDER) print(res)
+    for file in files:
+        if file is None: continue
+        filename = file.filename
+        filepath = os.path.join(path_temporario, filename)
+        file.save(filepath)
+        arquivos_salvos.append(filepath)
 
-    #chunks = chunksAux.get_chunks_doc_file(file, path_temporario)
-    #print(chunks[0])
-    print(chunksAux.get_chunks_file(file, path_temporario))
-
-    # filename = file.filename
-    # filepath = os.path.join(path_temporario, filename)
-    # file.save(filepath)
-
-    # try:
-    #     extracted_text = pytesseract.image_to_string(filepath, lang='por')
-    #     print(extracted_text)
-    # except Exception as e:
-    #     print(f"Erro ao converter com arquivo temporário: {e}")
-    # finally:
-    #     try:
-    #         os.remove(filepath)
-    #     except Exception as e:
-    #         print(f"Erro ao deletar arquivo '{filename}': {e}")
-
-
-
-
-    return jsonify({'message': 'Arquivos enviados com sucesso', 'filenames': filenames}), 201
+    return arquivos_salvos
 
 if __name__ == '__main__':
     rpf.TorchInit().init_torch()

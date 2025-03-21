@@ -69,7 +69,7 @@ No Linux altere o arquivo `.bashrc` ou `.zshrc`, etc.
 Para instalar, p.ex., o modelo [deepseek-r1:7b](https://ollama.com/library/deepseek-r1), execute o seguinte comando:
 
 ```bash
-ollama run deepseek-r1:7b
+ollama run deepseek-r1:latest
 ```
 
 [gemma3:27b](https://ollama.com/library/gemma3:27b)
@@ -84,7 +84,7 @@ Exemplo de consulta via `curl`:
 
 ```bash
 curl http://localhost:11434/api/generate -d '{
-  "model": "deepseek-r1:7b",
+  "model": "deepseek-r1:latest",
   "prompt": "What color is the sky at different times of the day? Respond using JSON",
   "format": "json",
   "stream": false

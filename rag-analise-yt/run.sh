@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# jsonserver, angular
-portas=(3000 4200)
+# flask
+portas=(5000)
 
 fnKillPID() {
   local portas_array=("$@")
@@ -16,23 +16,17 @@ fnKillPID() {
 
 fnKillPID "${portas[@]}"
 
-# Inicia o npm start
-cd /home/emerson/projetos/chat-ollama-angular/chat-ollama-angular
-npm i
-npm start &
-NPM_PID=$!
-
-# Inicia o json-server
-json-server --watch src/db/db.json &
-JSON_SERVER_PID=$!
+cd "/tmp/uv_environments"
+source my_env_3129/bin/activate
+uv run /home/emerson/projetos/chat-ollama-angular/rag-analise-yt/python/flask_server/server_flask_faiss.py &
+FLASK_PID=$!
 
 # Função para matar ambos os processos ao pressionar CTRL+C
 function cleanup {
   echo "Encerrando os processos..."
-  kill -9 $NPM_PID 2>/dev/null
-  kill -9 $JSON_SERVER_PID 2>/dev/null
+  kill -9 $FLASK_PID 2>/dev/null
   fnKillPID "${portas[@]}"
-  exit
+  exit 0
 }
 
 # Captura o sinal de interrupção (CTRL+C) e chama a função de limpeza
