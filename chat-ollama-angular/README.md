@@ -71,6 +71,7 @@ Para instalar, p.ex., o modelo [deepseek-r1:7b](https://ollama.com/library/deeps
 ```bash
 ollama run deepseek-r1:latest
 ```
+![](readme_imagens/ollama_deepseek.png)
 
 [gemma3:27b](https://ollama.com/library/gemma3:27b)
 
@@ -78,7 +79,7 @@ ollama run deepseek-r1:latest
 ollama run gemma3:27b
 ```
 
-![](readme_imagens/ollama_deepseek.png)
+
 
 Exemplo de consulta via `curl`:
 
