@@ -1,0 +1,149 @@
+.upload-container {
+    display: grid;
+    grid-template-columns: 1fr 100px;
+    gap: 5px;
+    align-items: flex-start;
+    max-height: 150px;
+    overflow: hidden;
+
+    .drop-area {
+        flex-grow: 1;
+        border: 2px dashed #ccc;
+        border-radius: 5px;
+        padding: 10px;
+        text-align: center;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 120px;
+        max-height: 120px;
+        overflow-y: auto;
+        box-sizing: border-box;
+    
+        p {
+            margin: 0;
+        }
+    
+        .highlight {
+            background-color: #f0f7ff;
+        }
+    }
+
+    .buttons-container {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        align-items: stretch;
+        width: 100%;
+        box-sizing: border-box;
+        height: 100%;
+    }
+
+    .upload-button, .clear-button {
+        flex-grow: 1;
+        flex-basis: 0;
+        padding: 0;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 15px;
+        transition: background-color 0.3s ease;
+        width: 100%;
+        box-sizing: border-box;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 0;
+
+        &:not(:disabled):hover {
+            background-color: #ccc;
+        }
+
+        &:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+    }
+
+    .clear-button {
+        font-size: 14px;
+        background-color: white;
+        color: #333;
+
+        &:not(:disabled):hover {
+            background-color: #f0f0f0;
+            border-color: #999;
+        }
+    }
+
+}
+
+/* File Rectangles Container */
+.file-rectangles-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    width: 100%;
+    padding: 3px;
+    box-sizing: border-box;
+    margin-top: 5px;
+    min-height: 20px;
+}
+
+/* Individual File Rectangle */
+.file-rectangle {
+    font-size: 8pt;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    text-align: left;
+    background-color: #fff;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    position: relative;
+    min-width: 110px;
+    max-width: 130px;
+    width: auto;
+    min-height: 15px;
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
+    overflow-wrap: break-word;
+    word-break: break-word;
+
+    &:hover {
+        background-color: #f0f0f0;
+        border-color: #999;
+    }
+}
+
+/* Remove File Button */
+.remove-file-button {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: rgba(200, 200, 200, 0.5);
+    opacity: 0.7;
+    border: 0px solid transparent;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    color: #555;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    opacity: 0.6;
+
+    &:hover {
+        opacity: 1;
+        background: rgba(255, 255, 255, 0.9);
+    }
+}

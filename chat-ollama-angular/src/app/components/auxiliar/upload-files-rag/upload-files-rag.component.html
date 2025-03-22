@@ -1,0 +1,28 @@
+<div class="upload-container">
+    <div
+        class="drop-area"
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave($event)"
+        (drop)="onDrop($event)"
+        [class.highlight]="isDragging"
+        (click)="fileInput.click()"
+    >
+        <p *ngIf="files.length === 0">Arraste e solte os arquivos aqui ou clique para selecionar</p>
+        <input type="file" id="file-input" multiple style="display: none;" (change)="onFileSelect($event)" #fileInput>
+        
+        <div class="file-rectangles-container" *ngIf="files.length > 0" (click)="($event).stopPropagation()">
+            <div class="file-rectangle" *ngFor="let file of files">
+                {{ file.name | truncate: 15 }}
+                <button class="remove-file-button" (click)="removeFile(file, $event)">
+                    ×
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+   <div class="buttons-container">
+        <button class="upload-button" (click)="onUpload()" [disabled]="files.length === 0">Enviar Arquivos</button>
+        <button class="clear-button" (click)="onClearFiles()" [disabled]="files.length === 0">Limpar Lista</button>
+    </div>
+</div>
