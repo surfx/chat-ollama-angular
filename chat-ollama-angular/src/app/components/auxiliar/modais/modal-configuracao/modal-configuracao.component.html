@@ -2,7 +2,7 @@
     <div class="modal-background" id="div_modal_background" (click)="clickHide($event)">
         <div class="modals-card" id="div_modal_card" (click)="$event.stopPropagation()">
             <div class="modal-header">
-            <p class="modal-heading">Dados RAG</p>
+            <p class="modal-heading">Configurações</p>
             <button class="exit-button" (click)="hide()">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 162 162" class="svgIconCross">
                     <path stroke-linecap="round" stroke-width="17" stroke="black" d="M9.01074 8.98926L153.021 153"></path>
@@ -17,26 +17,23 @@
 
             <div class="modal-body">
                 
-                <label>serviço</label>
+                <label for="config_ollama_api">Api Ollama</label>
+                <input type="text" id="config_ollama_api" [(ngModel)]="configuracoes!.ollama_api" />
+                <label>serviço flask (rag)</label>
                 <input type="text" id="txtUrlServico" [(ngModel)]="configuracoes!.configuracoesRAG!.urlServico">
-                <label>pasta</label>
+                <!-- <label>pasta</label>
                 <div class="div-selecao-pasta">
                     <input type="text" id="txtPathDocumentos" [(ngModel)]="configuracoes!.configuracoesRAG!.pathDocumentos">
-                    <!-- <input class="input_path_directory" id="fileInputDirectory" type="file" (change)="onFileSelected($event)" webkitdirectory directory>
+                    < !-- <input class="input_path_directory" id="fileInputDirectory" type="file" (change)="onFileSelected($event)" webkitdirectory directory>
                     <button class="btn_path_directory" id="btnPathDirectory" onclick="javascript:document.getElementById('fileInputDirectory').click();">
                         <i class="fa-regular fa-folder"></i>
-                    </button> -->
-                </div>
-                
-                <div class="div-progress-bar">
-                    <app-progress-bar [progresso]="progressbar" [tipoProgressBar]="tipoProgressBar" [visivel]="progressbarVisivel"></app-progress-bar>
-                </div>
+                    </button> -- >
+                </div> -->
+
             </div>
 
             <div class="button-wrapper">
                 <button class="accept modal-button" (click)="salvar()">Salvar</button>
-                <button class="indexar modal-button" (click)="indexar()" id="btnIndexar">Indexar</button>
-                <button class="deletar modal-button" (click)="deletarFaiss()" id="btnDeletar">Deletar</button>
                 <button class="reject modal-button" (click)="hide()">Fechar</button>
             </div>
         </div>

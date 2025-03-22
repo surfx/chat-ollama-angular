@@ -41,6 +41,11 @@
     }
 
     div {
+
+        .configuracoes_gear {
+            cursor: pointer;
+        }
+
         label {
             margin-right: 10px;
         }
@@ -200,7 +205,7 @@
 
             // .config-chat-generate { }
 
-            .config-chat-rag { 
+            .config-chat-rag {
                 font-size: 0.7em;
             }
 
@@ -213,6 +218,7 @@
                 label {
                     display: none;
                 }
+
                 input[type="range"] {
                     font-size: 0.8em;
                 }
@@ -275,11 +281,11 @@
                 justify-self: end;
             }
 
-            .config-chat-generate { 
+            .config-chat-generate {
                 grid-row-start: 2;
             }
 
-            .config-chat-rag { 
+            .config-chat-rag {
                 grid-row-start: 2;
                 justify-self: end;
                 font-size: 0.7rem;

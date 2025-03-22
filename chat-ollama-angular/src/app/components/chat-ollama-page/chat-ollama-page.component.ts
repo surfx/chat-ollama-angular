@@ -6,12 +6,13 @@ import { delay } from 'rxjs';
 import { Configuracoes, StatusIndexacao, TipoMensagem, UnifiedChatResponse } from '../../model/modelos';
 import { ConfiguracoesService } from '../../services/configuracoes.service';
 import { OllamaChatService } from '../../services/ollama-chat.service';
+import { PythonRagService } from '../../services/python-rag.service';
 import { ChatDisplayComponent } from '../auxiliar/chat-display/chat-display.component';
+import { ModalConfiguracaoComponent } from '../auxiliar/modais/modal-configuracao/modal-configuracao.component';
+import { ModalRagComponent } from '../auxiliar/modais/modal-rag/modal-rag.component';
+import { TagSelectionComponent } from '../auxiliar/tag-selection/tag-selection.component';
 import { MensagensOverlayComponent } from '../mensagens/mensagens-overlay/mensagens-overlay.component';
 import { MensagensComponent } from '../mensagens/mensagens/mensagens.component';
-import { TagSelectionComponent } from '../auxiliar/tag-selection/tag-selection.component';
-import { ModalRagComponent } from '../modal-rag/modal-rag.component';
-import { PythonRagService } from '../../services/python-rag.service';
 
 @Component({
   selector: 'app-chat-ollama-page',
@@ -22,7 +23,8 @@ import { PythonRagService } from '../../services/python-rag.service';
     MensagensOverlayComponent,
     ChatDisplayComponent,
     TagSelectionComponent,
-    ModalRagComponent
+    ModalRagComponent,
+    ModalConfiguracaoComponent
   ],
   templateUrl: './chat-ollama-page.component.html',
   styleUrl: './chat-ollama-page.component.scss',
@@ -35,6 +37,7 @@ export class ChatOllamaPageComponent {
   @ViewChild('appchatdisplay') appchatdisplay: ChatDisplayComponent | undefined;
   @ViewChild('tagSelection') tagSelection: TagSelectionComponent | undefined;
   @ViewChild('modalRagComponent') modalRagComponent: ModalRagComponent | undefined;
+  @ViewChild('modalConfiguracaoComponent') modalConfiguracaoComponent: ModalConfiguracaoComponent | undefined;
 
   public configuracoes: Partial<Configuracoes> = {
     configuracoes: {
@@ -62,7 +65,6 @@ export class ChatOllamaPageComponent {
         if (this.configuracoes.ollama_api) this.ollamaChatService.setHost(this.configuracoes.ollama_api);
         if (!this.configuracoes.configuracoesRAG) {
           this.configuracoes.configuracoesRAG = {
-            pathDocumentos: '',
             urlServico: 'http://127.0.0.1:5000/'
           };
         }
@@ -88,21 +90,28 @@ export class ChatOllamaPageComponent {
   }
 
   //#region btns
-  btnSalvarConfiguracoes(showMessage = true) {
-    if (!this.configuracoes || !this.configuracoes.ollama_api) { return; }
-    this.ollamaChatService.setHost(this.configuracoes.ollama_api);
+  // btnSalvarConfiguracoes(showMessage = true) {
+  //   if (!this.configuracoes || !this.configuracoes.ollama_api) { return; }
+  //   this.ollamaChatService.setHost(this.configuracoes.ollama_api);
 
-    this.configuracoesService.updateConfiguracao(this.defaultId, this.configuracoes).subscribe({
-      next: (res) => {
-        if (!showMessage) { return; }
-        this.mensagensOverlayComponent?.show('Configurações Salvas', TipoMensagem.SUCESSO, 700);
-      },
-      error: (err) => {
-        if (!showMessage) { return; }
-        this.mensagensOverlayComponent?.show('Erro ao salvar as configurações', TipoMensagem.ERRO, 1000);
-      },
-      complete: () => { }
-    });
+  //   this.configuracoesService.updateConfiguracao(this.defaultId, this.configuracoes).subscribe({
+  //     next: (res) => {
+  //       if (!showMessage) { return; }
+  //       this.mensagensOverlayComponent?.show('Configurações Salvas', TipoMensagem.SUCESSO, 700);
+  //     },
+  //     error: (err) => {
+  //       if (!showMessage) { return; }
+  //       this.mensagensOverlayComponent?.show('Erro ao salvar as configurações', TipoMensagem.ERRO, 1000);
+  //     },
+  //     complete: () => { }
+  //   });
+  // }
+
+  btnShowConfiguracoes() {
+    if (!this.modalConfiguracaoComponent) return;
+    this.modalConfiguracaoComponent.configuracoes = this.configuracoes;
+
+    this.modalConfiguracaoComponent.show();
   }
 
   btnLimparMensagem() {
@@ -239,8 +248,23 @@ export class ChatOllamaPageComponent {
   }
 
   protected onchangeChkRag(): void {
-    this.btnSalvarConfiguracoes(false);
+    let showMessage = false;
+    if (!this.configuracoes || !this.configuracoes.ollama_api) { return; }
+    this.ollamaChatService.setHost(this.configuracoes.ollama_api);
+
+    this.configuracoesService.updateConfiguracao(this.defaultId, this.configuracoes).subscribe({
+      next: (res) => {
+        if (!showMessage) { return; }
+        this.mensagensOverlayComponent?.show('Configurações Salvas', TipoMensagem.SUCESSO, 700);
+      },
+      error: (err) => {
+        if (!showMessage) { return; }
+        this.mensagensOverlayComponent?.show('Erro ao salvar as configurações', TipoMensagem.ERRO, 1000);
+      },
+      complete: () => { }
+    });
   }
+
   //#endregion
 
   //#region image upload

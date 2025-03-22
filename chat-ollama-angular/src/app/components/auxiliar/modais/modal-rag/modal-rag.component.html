@@ -1,0 +1,30 @@
+@if(visivel()){
+    <div class="modal-background" id="div_modal_background" (click)="clickHide($event)">
+        <div class="modals-card" id="div_modal_card" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+            <p class="modal-heading">Python RAG Faiss</p>
+            <button class="exit-button" (click)="hide()">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 162 162" class="svgIconCross">
+                    <path stroke-linecap="round" stroke-width="17" stroke="black" d="M9.01074 8.98926L153.021 153"></path>
+                    <path stroke-linecap="round" stroke-width="17" stroke="black" d="M9.01074 153L153.021 8.98926"></path>
+                </svg>
+            </button>
+            </div>
+
+            <div class="modal-mensagens">
+                <app-mensagens #mensagemComponente></app-mensagens>
+            </div>
+
+            <div class="modal-body">
+
+                <app-upload-files-rag (pollingStatus)="evtPollingStatus($event)"></app-upload-files-rag>
+
+            </div>
+
+            <div class="button-wrapper">
+                <button class="deletar modal-button" (click)="deletarFaiss()" id="btnDeletar">Deletar Faiss db</button>
+                <button class="reject modal-button" (click)="hide()">Fechar</button>
+            </div>
+        </div>
+    </div>
+}

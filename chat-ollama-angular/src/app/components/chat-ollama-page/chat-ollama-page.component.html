@@ -1,8 +1,6 @@
 <app-mensagens-overlay #mensagensOverlayComponent></app-mensagens-overlay>
-<app-modal-rag #modalRagComponent 
-    (configuracoesSalvas)="evtConfiguracoesSalvas()"
-    (pollingStatus)="evtPollingStatus($event)"
-></app-modal-rag>
+<app-modal-rag #modalRagComponent (pollingStatus)="evtPollingStatus($event)"></app-modal-rag>
+<app-modal-configuracao #modalConfiguracaoComponent (configuracoesSalvas)="evtConfiguracoesSalvas()"></app-modal-configuracao>
 
 <div class="container">
     <header class="header">
@@ -12,9 +10,7 @@
         </h1>
 
         <div>
-            <label for="config_ollama_api">Api Ollama</label>
-            <input type="text" id="config_ollama_api" [(ngModel)]="configuracoes!.ollama_api" />
-            <button (click)="btnSalvarConfiguracoes()">Salvar</button>
+            <i class="fa-solid fa-gear configuracoes_gear" (click)="btnShowConfiguracoes()"></i>
         </div>
 
     </header>

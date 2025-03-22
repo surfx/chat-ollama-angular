@@ -15,7 +15,6 @@ export interface ConfiguracoesClass {
 
 export interface ConfiguracoesRAG {
     urlServico: string;
-    pathDocumentos: string;
 }
 
 export enum TipoMensagem {

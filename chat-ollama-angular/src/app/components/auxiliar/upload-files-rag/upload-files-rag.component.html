@@ -5,7 +5,8 @@
         (dragleave)="onDragLeave($event)"
         (drop)="onDrop($event)"
         [class.highlight]="isDragging"
-        (click)="fileInput.click()"
+        [class.disabled-drop-area]="isIndexing()"
+        (click)="onDropAreaClick(fileInput)"
     >
         <p *ngIf="files.length === 0">Arraste e solte os arquivos aqui ou clique para selecionar</p>
         <input type="file" id="file-input" multiple style="display: none;" (change)="onFileSelect($event)" #fileInput>
@@ -26,3 +27,5 @@
         <button class="clear-button" (click)="onClearFiles()" [disabled]="files.length === 0">Limpar Lista</button>
     </div>
 </div>
+
+<app-progress-bar [progresso]="progressbar" [tipoProgressBar]="tipoProgressBar" [visivel]="progressbarVisivel"></app-progress-bar>
