@@ -1,5 +1,10 @@
 /* From Uiverse.io by vinodjangid07 */
 
+$cor-green: #86d993;
+$cor-reject: #ececec;
+$cor-deletar: #e52207;
+$cor-background: #ddd;
+
 .modal-background {
     // display: none;
     position: fixed;
@@ -108,29 +113,29 @@
 }
 
 .reject {
-    background-color: #ececec;
+    background-color: $cor-reject;
     color: rgb(34, 34, 34);
 
     &:hover {
-        background-color: #ddd;
+        background-color: $cor-background;
     }
 }
 
 .indexar {
-    background-color: #86d993;
+    background-color: $cor-green;
     color: white;
 
     &:hover {
-        background-color: #ddd;
+        background-color: $cor-background;
     }
 }
 
 .deletar {
-    background-color: #e52207;
+    background-color: $cor-deletar;
     color: white;
 
     &:hover {
-        background-color: #ddd;
+        background-color: $cor-background;
     }
 }
 
@@ -149,7 +154,7 @@
     cursor: pointer;
 
     &:hover {
-        background-color: #ddd;
+        background-color: $cor-background;
         color: white;
     }
 }

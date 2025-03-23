@@ -1,4 +1,4 @@
-import { Component, EventEmitter, input, Input, Output, signal } from '@angular/core';
+import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
 
 @Component({
   selector: 'app-tag-selection',

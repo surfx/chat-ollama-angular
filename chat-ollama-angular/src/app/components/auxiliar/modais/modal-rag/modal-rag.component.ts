@@ -98,6 +98,9 @@ export class ModalRagComponent {
 
 
   protected deletarFaiss(): void {
+    // TODO: criar modal y/n
+    if (!confirm('Deseja deletar toda a base de dados RAG ?')) { return; }
+
     this.pythonRagService.deleteFaiss().subscribe({
       next: (res) => {
         this.mensagemComponente?.show('Faiss db excluído', TipoMensagem.INFO, 1000);
@@ -120,6 +123,11 @@ export class ModalRagComponent {
     !!status && !!this.pollingStatus && this.pollingStatus.emit(status);
   }
   //#endregion
+
+  protected evtShowMessage(event: { mensagem: string, tipo: TipoMensagem, timeout?: number }): void {
+    const { mensagem, tipo, timeout } = event;
+    this.mensagemComponente?.show(mensagem, tipo, timeout);
+  }
 
 }
 

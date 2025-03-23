@@ -1,18 +1,21 @@
 // ---------------------------------------------------
 // geral
 // ---------------------------------------------------
+$cor-green: #86d993;
+
+
 .rdo_chat_generate {
     display: flex;
     align-items: center;
     justify-content: space-around;
     text-align: center;
     font-size: .8rem;
-    border: 1pt solid #86d993;
+    border: 1pt solid $cor-green;
     border-radius: 2pt;
     cursor: pointer;
 
     .selecionado {
-        background-color: #86d993;
+        background-color: $cor-green;
         color: white;
     }
 

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Ollama, ModelResponse, Message, ChatResponse, GenerateResponse } from 'ollama';
 import { map, Observable } from 'rxjs';
-import { UnifiedChatResponse } from '../model/modelos';
+import { ModosValidos, UnifiedChatResponse } from '../model/modelos';
 //import * as Showdown from 'showdown';
 
 @Injectable({
@@ -23,7 +23,7 @@ export class OllamaChatService {
 
   //#region constulas ollama - chat / generate
   public consultaOllama(
-    modo: 'chat' | 'generate' = 'chat',
+    modo: typeof ModosValidos[number] = 'chat',
     userPrompt: string,
     modelo = 'deepseek-v2:16b',
     temperatura: number = 0.7,

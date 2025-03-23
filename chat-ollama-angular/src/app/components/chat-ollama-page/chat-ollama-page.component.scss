@@ -1,5 +1,9 @@
 @import url('../../../../public/css/css_code_style.css');
 
+$cor-fundo: #c6c6c6;
+$cor-main: #f1f1f1;
+$cor-server-on: #168821;
+$cor-server-off: #e52207;
 
 .loading_img_chat {
     width: 35px;
@@ -14,7 +18,7 @@
 
 .header,
 .footer {
-    border-bottom: 1pt solid #c6c6c6;
+    border-bottom: 1pt solid $cor-fundo;
     border-collapse: collapse;
     min-height: 30px;
     padding: 20px;
@@ -62,14 +66,14 @@
             border: 0;
 
             &:hover {
-                background-color: #c6c6c6;
+                background-color: $cor-fundo;
             }
         }
     }
 }
 
 .main {
-    background-color: #f1f1f1;
+    background-color: $cor-main;
     flex: 1;
     padding: 20px;
     display: flex;
@@ -79,14 +83,14 @@
 }
 
 .footer {
-    border-top: 1pt solid #c6c6c6;
+    border-top: 1pt solid $cor-fundo;
     min-height: 100px;
     display: flex;
     flex-direction: column;
 
     .model-config {
         display: grid;
-        grid-template-columns: repeat(5, auto);
+        grid-template-columns: repeat(4, auto);
         align-items: center;
         height: 50px;
         gap: 10px;
@@ -99,16 +103,15 @@
             font-size: 0.9rem;
 
             .server-online {
-                color: #168821;
+                color: $cor-server-on;
             }
 
             .server-offline {
-                color: #e52207;
+                color: $cor-server-off;
             }
         }
 
         // .config-chat-generate { }
-        // .config-chat-rag { }
 
         .config-temperature {
             display: grid;
@@ -164,7 +167,7 @@
             border: 0;
 
             &:hover {
-                background-color: #c6c6c6;
+                background-color: $cor-fundo;
             }
         }
     }
@@ -354,7 +357,7 @@
                 border: 0;
 
                 &:hover {
-                    background-color: #c6c6c6;
+                    background-color: $cor-fundo;
                 }
             }
         }

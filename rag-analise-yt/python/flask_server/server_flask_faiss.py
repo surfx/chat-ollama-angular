@@ -58,24 +58,25 @@ def funcao_callback_arquivos(future, caminhos_arquivos):
     finally:
         print("Callback: Ação pós-tarefa executada.")
 
-@app.route('/indexarFaissdb', methods=['POST'])
-def indexar_faissdb():
-    """
-    Indexa os arquivos de uma pasta no faiss db
-    """
-    path_arquivos = request.data.decode('utf-8')  # Obtém o corpo da requisição como string
+# Deprecado
+# @app.route('/indexarFaissdb', methods=['POST'])
+# def indexar_faissdb():
+#     """
+#     Indexa os arquivos de uma pasta no faiss db
+#     """
+#     path_arquivos = request.data.decode('utf-8')  # Obtém o corpo da requisição como string
 
-    if not path_arquivos: 
-        return jsonify({"success": False, "message": "Nenhum parâmetro 'path_arquivos' fornecido."}), 400
+#     if not path_arquivos: 
+#         return jsonify({"success": False, "message": "Nenhum parâmetro 'path_arquivos' fornecido."}), 400
     
-    # vectorstore = faissAuxiliar.get_vector_store()
-    # faissBatch = rpf.FaissBatch(vectorstore=vectorstore)
-    # vectorstore = faissBatch.faiss_indexing(path_arquivos)
+#     # vectorstore = faissAuxiliar.get_vector_store()
+#     # faissBatch = rpf.FaissBatch(vectorstore=vectorstore)
+#     # vectorstore = faissBatch.faiss_indexing(path_arquivos)
 
-    future_indexacao = executor.submit(faissBatch.faiss_indexing, path_arquivos)
-    future_indexacao.add_done_callback(funcao_callback)
+#     future_indexacao = executor.submit(faissBatch.faiss_indexing, path_arquivos)
+#     future_indexacao.add_done_callback(funcao_callback)
 
-    return jsonify({"success": True, "message": "Indexação iniciada em segundo plano."}), 200
+#     return jsonify({"success": True, "message": "Indexação iniciada em segundo plano."}), 200
 
 @app.route('/doQuestion', methods=['GET'])
 def do_question_llm():

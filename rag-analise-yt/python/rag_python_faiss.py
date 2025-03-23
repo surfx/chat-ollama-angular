@@ -3,7 +3,7 @@
 # uv run D:\meus_documentos\workspace\ia\chat-ollama-angular\rag-analise-yt\python\rag_python_faiss.py
 
 # DELETAR PATH_ARQUIVOS
-PATH_ARQUIVOS = r"D:\meus_documentos\workspace\ia\chat-ollama-angular\rag-analise-yt\data"
+# PATH_ARQUIVOS = r"D:\meus_documentos\workspace\ia\chat-ollama-angular\rag-analise-yt\data"
 LANG = "por" # por | eng
 # Diretório onde o banco de dados será salvo
 persist_directory = r"/home/emerson/projetos/chat-ollama-angular/db"
@@ -274,6 +274,7 @@ from langchain.docstore.document import Document
 #from langchain_community.embeddings import OllamaEmbeddings
 # from langchain_ollama import OllamaEmbeddings 
 # from pathlib import Path
+import traceback
 
 class FaissBatch:
 
@@ -311,50 +312,50 @@ class FaissBatch:
         return self.generate_id_filename(os.path.basename(source), page_index)
 
 
-    def faiss_indexing(
-        self,
-        path_arquivos=PATH_ARQUIVOS
-    ):
-        """Indexa chunks em lote no FAISS."""
+    # def faiss_indexing(
+    #     self,
+    #     path_arquivos=PATH_ARQUIVOS
+    # ):
+    #     """Indexa chunks em lote no FAISS."""
 
-        self.status_indexacao["porcentagem"] = 0
-        self.status_indexacao["terminado"] = False
+    #     self.status_indexacao["porcentagem"] = 0
+    #     self.status_indexacao["terminado"] = False
 
-        imagens, documentos = self.separarDocumentos.separar_arquivos(path_arquivos)
-        total_arquivos = len(imagens) + len(documentos)
-        arquivos_processados = 0
+    #     imagens, documentos = self.separarDocumentos.separar_arquivos(path_arquivos)
+    #     total_arquivos = len(imagens) + len(documentos)
+    #     arquivos_processados = 0
 
-        for imagem in imagens:
-            id_aux = self.generate_id_filename(imagem, 0)
-            results = self.vectorstore.get_by_ids([id_aux]);
-            if results and results[0].id and id_aux in results[0].id:
-                print(f"Documento com ID {id_aux} | {os.path.basename(imagem)} já existe na coleção.")
+    #     for imagem in imagens:
+    #         id_aux = self.generate_id_filename(imagem, 0)
+    #         results = self.vectorstore.get_by_ids([id_aux]);
+    #         if results and results[0].id and id_aux in results[0].id:
+    #             print(f"Documento com ID {id_aux} | {os.path.basename(imagem)} já existe na coleção.")
 
-                arquivos_processados += 1
-                self.status_indexacao["porcentagem"] = int((arquivos_processados / total_arquivos) * 100)
-                continue
+    #             arquivos_processados += 1
+    #             self.status_indexacao["porcentagem"] = int((arquivos_processados / total_arquivos) * 100)
+    #             continue
 
-            self.faiss_indexing_batch(self.chunkAux.get_chunks_image(imagem))
-            arquivos_processados += 1
-            self.status_indexacao["porcentagem"] = int((arquivos_processados / total_arquivos) * 100)
+    #         self.faiss_indexing_batch(imagem, self.chunkAux.get_chunks_image(imagem))
+    #         arquivos_processados += 1
+    #         self.status_indexacao["porcentagem"] = int((arquivos_processados / total_arquivos) * 100)
 
-        for documento in documentos:
-            id_aux = self.generate_id_filename(documento, 0)
-            results = self.vectorstore.get_by_ids([id_aux]);
-            if results and results[0].id and id_aux in results[0].id:
-                print(f"Documento com ID {id_aux} | {os.path.basename(documento)} já existe na coleção.")
+    #     for documento in documentos:
+    #         id_aux = self.generate_id_filename(documento, 0)
+    #         results = self.vectorstore.get_by_ids([id_aux]);
+    #         if results and results[0].id and id_aux in results[0].id:
+    #             print(f"Documento com ID {id_aux} | {os.path.basename(documento)} já existe na coleção.")
 
-                arquivos_processados += 1
-                self.status_indexacao["porcentagem"] = int((arquivos_processados / total_arquivos) * 100)
-                continue
+    #             arquivos_processados += 1
+    #             self.status_indexacao["porcentagem"] = int((arquivos_processados / total_arquivos) * 100)
+    #             continue
 
-            self.faiss_indexing_batch(self.chunkAux.get_chunks_doc(documento))
-            arquivos_processados += 1
-            self.status_indexacao["porcentagem"] = int((arquivos_processados / total_arquivos) * 100)
+    #         self.faiss_indexing_batch(documento, self.chunkAux.get_chunks_doc(documento))
+    #         arquivos_processados += 1
+    #         self.status_indexacao["porcentagem"] = int((arquivos_processados / total_arquivos) * 100)
 
-        self.status_indexacao["porcentagem"] = 100
-        self.status_indexacao["terminado"] = True
-        return self.vectorstore
+    #     self.status_indexacao["porcentagem"] = 100
+    #     self.status_indexacao["terminado"] = True
+    #     return self.vectorstore
     
     def faiss_indexing_files(self, lista_caminhos_arquivos):
         if (lista_caminhos_arquivos is None or len(lista_caminhos_arquivos) <= 0): return self.vectorstore
@@ -362,32 +363,41 @@ class FaissBatch:
         total_arquivos = len(lista_caminhos_arquivos)
         arquivos_processados = 0
 
-        for caminho_arquivo in lista_caminhos_arquivos:
-            filename = os.path.basename(caminho_arquivo) if caminho_arquivo != '' else ''
-            if caminho_arquivo == '' or filename == '': continue
-            filename = filename.lower()
-            id_aux = self.generate_id_filename(filename, 0)
-            results = self.vectorstore.get_by_ids([id_aux]);
+        try:
+            for caminho_arquivo in lista_caminhos_arquivos:
+                filename = os.path.basename(caminho_arquivo) if caminho_arquivo != '' else ''
+                if caminho_arquivo == '' or filename == '': continue
+                filename = filename.lower()
+                document_id = self.generate_id_filename(filename, 0)
+                results = self.vectorstore.get_by_ids([document_id]);
 
-            if results and results[0].id and id_aux in results[0].id:
-                print(f"Documento com ID {id_aux} | {filename} já existe na coleção.")
-                if os.path.exists(caminho_arquivo): os.remove(caminho_arquivo)
+                if results and results[0].id and document_id in results[0].id:
+                    print(f"Documento com ID {document_id} | {filename} já existe na coleção.")
+                    if os.path.exists(caminho_arquivo): os.remove(caminho_arquivo)
 
+                    arquivos_processados += 1
+                    self.status_indexacao["porcentagem"] = int((arquivos_processados / total_arquivos) * 100)
+                    continue
+
+                self.faiss_indexing_batch(filename, self.chunkAux.get_chunks_file(caminho_arquivo))
                 arquivos_processados += 1
                 self.status_indexacao["porcentagem"] = int((arquivos_processados / total_arquivos) * 100)
-                continue
+                if os.path.exists(caminho_arquivo): os.remove(caminho_arquivo)
 
-            self.faiss_indexing_batch(self.chunkAux.get_chunks_file(caminho_arquivo))
-            arquivos_processados += 1
-            self.status_indexacao["porcentagem"] = int((arquivos_processados / total_arquivos) * 100)
-            if os.path.exists(caminho_arquivo): os.remove(caminho_arquivo)
+            self.status_indexacao["porcentagem"] = 100
+            self.status_indexacao["terminado"] = True
+        except Exception:
+            print('-----------------------------')
+            traceback.print_exc()
+            print('-----------------------------')
+            self.status_indexacao["terminado"] = True
 
         self.status_indexacao["porcentagem"] = 100
         self.status_indexacao["terminado"] = True
         return self.vectorstore
 
 
-    def faiss_indexing_batch(self, chunks):
+    def faiss_indexing_batch(self, filename, chunks):
         """Indexa chunks em lote no FAISS db."""
 
         if not chunks or not self.vectorstore:
@@ -400,7 +410,8 @@ class FaissBatch:
         # metadatas_to_add = []
 
         for i, chunk in enumerate(chunks):
-            document_id = self.generate_id(chunk, i)
+            document_id = self.generate_id_filename(filename, i)
+
             results = self.vectorstore.get_by_ids([document_id]);
             if results and results[0].id and document_id in results[0].id:
                 print(f"Documento com ID {document_id} já existe na coleção.")

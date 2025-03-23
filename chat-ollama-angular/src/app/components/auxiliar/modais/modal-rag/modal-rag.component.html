@@ -17,7 +17,10 @@
 
             <div class="modal-body">
 
-                <app-upload-files-rag (pollingStatus)="evtPollingStatus($event)"></app-upload-files-rag>
+                <app-upload-files-rag 
+                    (pollingStatus)="evtPollingStatus($event)"
+                    (showMessage)="evtShowMessage($event)"
+                ></app-upload-files-rag>
 
             </div>
 

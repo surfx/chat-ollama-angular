@@ -7,9 +7,10 @@ export interface Configuracoes {
     configuracoesRAG: ConfiguracoesRAG;
 }
 
+export const ModosValidos = ['chat', 'generate', 'rag'];
+
 export interface ConfiguracoesClass {
-    modo: 'chat' | 'generate';
-    rag: boolean;
+    modo: typeof ModosValidos[number]; // 'chat' | 'generate' | 'rag'
     temperatura: number;
 }
 

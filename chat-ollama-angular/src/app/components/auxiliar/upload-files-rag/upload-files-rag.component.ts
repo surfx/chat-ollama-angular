@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, OnDestroy, Output, signal } from '@angular/core';
 import { Subject, Subscription, takeUntil } from 'rxjs';
-import { StatusIndexacao } from '../../../model/modelos';
+import { StatusIndexacao, TipoMensagem } from '../../../model/modelos';
 import { TruncatePipe } from '../../../pipes/truncate.pipe';
 import { PythonRagService } from '../../../services/python-rag.service';
 import { ProgressBarComponent, TipoProgressBar } from '../progress-bar/progress-bar.component';
@@ -22,6 +22,7 @@ export class UploadFilesRagComponent implements OnDestroy {
   protected progressbarVisivel = signal(false);
 
   @Output() pollingStatus = new EventEmitter<StatusIndexacao>();
+  @Output() showMessage = new EventEmitter<{ mensagem: string, tipo: TipoMensagem, timeout: number | undefined }>();
 
   files: File[] = [];
   isDragging = false;
@@ -35,6 +36,7 @@ export class UploadFilesRagComponent implements OnDestroy {
     this.endSubscription();
   }
 
+  //#region drag & drop
   onDragOver(event: DragEvent): void {
     if (this.isIndexing()) { return; }
     event.preventDefault();
@@ -64,6 +66,7 @@ export class UploadFilesRagComponent implements OnDestroy {
       this.addFiles(Array.from(droppedFiles));
     }
   }
+  //#endregion
 
   onFileSelect(event: any): void {
     if (this.isIndexing()) { return; }
@@ -99,22 +102,34 @@ export class UploadFilesRagComponent implements OnDestroy {
     this.pythonRagService.uploadFilesRag(this.files).subscribe({
       next: (response) => {
         if (!response) {
-          console.error('Erro ao realizar o upload dos arquivos para análise RAG', response);
+          let msg = 'Erro ao realizar o upload dos arquivos para análise RAG';
+          console.error(msg, response);
+          this.emitirMensagem(msg, TipoMensagem.ALERTA);
           return;
         }
+
+        this.emitirMensagem('Análise RAG iniciada em segundo plano. Por favor aguarde', TipoMensagem.SUCESSO, 3500);
+
         this.doPolling();
-        console.log(response);
+        this.progressbarVisivel.set(true);
         this.uploadProgress = response.porcentagem;
+        this.progressbar.set(response.porcentagem);
+        this.tipoProgressBar.set(TipoProgressBar.INFO);
         console.log('this.uploadProgress: ', this.uploadProgress);
         if (this.uploadProgress >= 100) {
           this.files = [];
+          this.progressbarVisivel.set(false);
+
+          this.emitirMensagem('Upload concluído', TipoMensagem.SUCESSO);
         }
         // this.isIndexing.set(false);
       },
       error: (err) => {
         console.error('Erro no Upload:', err);
+        this.emitirMensagem('Erro no Upload:', TipoMensagem.ERRO);
         this.uploadProgress = 0;
         this.isIndexing.set(false);
+        this.progressbarVisivel.set(false);
       },
       // complete: () => {
       //   this.isIndexing.set(false);
@@ -139,6 +154,8 @@ export class UploadFilesRagComponent implements OnDestroy {
     let btnIndexar = document.getElementById('btnIndexar') as HTMLButtonElement;
     if (!!btnIndexar) btnIndexar.disabled = true;
 
+    let shownMsgInit = false;
+
     this.pollingSubscription = this.pythonRagService.getStatusIndexacaoWithPolling()
       .pipe(takeUntil(this.unsubscribe$)) // Para evitar vazamentos de memória ao destruir o componente
       .subscribe({
@@ -149,11 +166,19 @@ export class UploadFilesRagComponent implements OnDestroy {
           this.progressbar.set(status.porcentagem);
           this.tipoProgressBar.set(TipoProgressBar.INFO);
 
+          if (!shownMsgInit) {
+            this.emitirMensagem('Análise RAG iniciada em segundo plano. Por favor aguarde', TipoMensagem.SUCESSO, 3500);
+            shownMsgInit = true;
+          }
+
           this.isIndexing.set(true);
 
-          if (status.terminado === true || status.porcentagem >= 100) {
+          if (status.terminado === true && status.porcentagem >= 100) {
             this.isIndexing.set(false);
             console.log('Indexação Concluída:', status);
+
+            this.emitirMensagem('Indexação Concluída', TipoMensagem.SUCESSO);
+
             if (!!btnIndexar) btnIndexar.disabled = false;
             this.tipoProgressBar.set(TipoProgressBar.SUCESSO);
             this.progressbar.set(100.0);
@@ -164,6 +189,8 @@ export class UploadFilesRagComponent implements OnDestroy {
         error: (err) => {
           if (!!btnIndexar) btnIndexar.disabled = false;
           this.isIndexing.set(false);
+
+          this.emitirMensagem('Erro na indexação Concluída', TipoMensagem.ERRO);
 
           //console.error('Erro no polling do status:', err);
           this.tipoProgressBar.set(TipoProgressBar.ERRO);
@@ -181,5 +208,14 @@ export class UploadFilesRagComponent implements OnDestroy {
     //let btnIndexar = window.document.getElementById('btnIndexar') as HTMLButtonElement; btnIndexar.disabled = false;
   }
   //#endregion
+
+  private emitirMensagem(mensagem: string, tipo: TipoMensagem = TipoMensagem.INFO, timeout: number = 1500) {
+    if (!this.showMessage) { return; }
+    this.showMessage.emit({
+      mensagem: mensagem,
+      tipo: tipo,
+      timeout: timeout || 1500
+    });
+  }
 
 }

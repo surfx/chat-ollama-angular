@@ -16,7 +16,6 @@ export enum TipoProgressBar {
 })
 export class ProgressBarComponent {
 
-
   @Input() tipoProgressBar = signal(TipoProgressBar.INFO);
   @Input() progresso = signal(0.0);
   @Input() visivel = signal(true);

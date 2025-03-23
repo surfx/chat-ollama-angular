@@ -5,8 +5,7 @@
       "ollama_api": "http://127.0.0.1:11434",
       "configuracoes": {
         "temperatura": 0.7,
-        "modo": "generate",
-        "rag": false
+        "modo": "rag"
       },
       "configuracoesRAG": {
         "urlServico": "http://127.0.0.1:5000/"
