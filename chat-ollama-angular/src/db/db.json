@@ -2,14 +2,34 @@
   "configuracao": [
     {
       "id": "1",
-      "ollama_api": "http://127.0.0.1:11434",
+      "ollama_api": "http://localhost:11434",
       "configuracoes": {
-        "temperatura": 0.7,
-        "modo": "chat"
+        "modo": "rag",
+        "temperatura": 0.7
       },
       "configuracoesRAG": {
         "urlServico": "http://127.0.0.1:5000/",
-        "localModel": "deepseek-r1:latest"
+        "lang": "por",
+        "persistDbDirectory": "/home/emerson/projetos/chat-ollama-angular/db",
+        "uploadPathTemp": "/home/emerson/projetos/chat-ollama-angular/temp",
+        "localModel": "deepseek-r1:latest",
+        "embeddingModelName": "nomic-embed-text",
+        "allowedExtensions": [
+          "txt",
+          "pdf",
+          "png",
+          "jpg",
+          "jpeg",
+          "gif",
+          "html"
+        ],
+        "extensoesImagens": [
+          ".jpg",
+          ".jpeg",
+          ".png",
+          ".gif",
+          ".bmp"
+        ]
       }
     }
   ]

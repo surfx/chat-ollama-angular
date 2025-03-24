@@ -21,6 +21,21 @@
                 <input type="text" id="config_ollama_api" [(ngModel)]="configuracoes!.ollama_api" />
                 <label>serviço flask (rag)</label>
                 <input type="text" id="txtUrlServico" [(ngModel)]="configuracoes!.configuracoesRAG!.urlServico">
+                <label>LANG</label>
+                <input type="text" [(ngModel)]="configuracoes!.configuracoesRAG!.lang">
+                <label>persist db (faiss)</label>
+                <input type="text" [(ngModel)]="configuracoes!.configuracoesRAG!.persistDbDirectory">
+                <label>upload temp</label>
+                <input type="text" [(ngModel)]="configuracoes!.configuracoesRAG!.uploadPathTemp">
+                <label>modelo local</label>
+                <input type="text" [(ngModel)]="configuracoes!.configuracoesRAG!.localModel" disabled="disabled">
+                <label>embedding model</label>
+                <input type="text" [(ngModel)]="configuracoes!.configuracoesRAG!.embeddingModelName">
+                <label>extensões permitidas</label>
+                <input type="text" [(ngModel)]="configuracoes!.configuracoesRAG!.allowedExtensions">
+                <label>extensões imagens</label>
+                <input type="text" [(ngModel)]="configuracoes!.configuracoesRAG!.extensoesImagens">
+
                 <!-- <label>pasta</label>
                 <div class="div-selecao-pasta">
                     <input type="text" id="txtPathDocumentos" [(ngModel)]="configuracoes!.configuracoesRAG!.pathDocumentos">
@@ -34,6 +49,7 @@
 
             <div class="button-wrapper">
                 <button class="accept modal-button" (click)="salvar()">Salvar</button>
+                <button class="resetar modal-button" (click)="resetar()">Resetar</button>
                 <button class="reject modal-button" (click)="hide()">Fechar</button>
             </div>
         </div>

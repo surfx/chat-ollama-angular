@@ -13,6 +13,7 @@ import { ModalRagComponent } from '../auxiliar/modais/modal-rag/modal-rag.compon
 import { TagSelectionComponent } from '../auxiliar/tag-selection/tag-selection.component';
 import { MensagensOverlayComponent } from '../mensagens/mensagens-overlay/mensagens-overlay.component';
 import { MensagensComponent } from '../mensagens/mensagens/mensagens.component';
+import { Util } from '../../util/util';
 
 @Component({
   selector: 'app-chat-ollama-page',
@@ -54,7 +55,7 @@ export class ChatOllamaPageComponent {
   ) {
     this.configuracoesService.getConfiguracao(this.defaultId).subscribe({
       next: (res) => {
-        this.configuracoes = res;
+        this.configuracoes = Util.mergeConfiguracoesRecursivo(this.configuracoes as Configuracoes, res);
         if (this.configuracoes.ollama_api) this.ollamaChatService.setHost(this.configuracoes.ollama_api);
         this.atualizarConfiguracoesRAG();
       },
@@ -99,7 +100,7 @@ export class ChatOllamaPageComponent {
 
   btnShowConfiguracoes() {
     if (!this.modalConfiguracaoComponent) return;
-    this.modalConfiguracaoComponent.configuracoes = this.configuracoes;
+    this.modalConfiguracaoComponent.configuracoes = this.configuracoes as Configuracoes;
 
     this.modalConfiguracaoComponent.show();
   }
@@ -229,7 +230,10 @@ export class ChatOllamaPageComponent {
     this.modalRagComponent.show();
   }
 
-  protected evtConfiguracoesSalvas(): void {
+  protected evtConfiguracoesSalvas(configuracoes: Configuracoes | undefined): void {
+    if (!configuracoes) { return; }
+    this.configuracoes = configuracoes;
+    this.atualizarConfiguracoesRAG();
     this.mensagensOverlayComponent?.show('Configurações Salvas', TipoMensagem.SUCESSO, 700);
   }
   protected evtPollingStatus(status: StatusIndexacao): void {
@@ -361,7 +365,7 @@ export class ChatOllamaPageComponent {
     if (!this.configuracoes.configuracoesRAG) { return; }
     this.pythonRagService.atualizarConfiguracoesRAG(this.configuracoes.configuracoesRAG)?.subscribe({
       next: (valor) => {
-        
+
       }
     });
   }

@@ -1,25 +1,25 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output, signal, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Configuracoes, TipoMensagem } from '../../../../model/modelos';
+import getDefaultPartialConfig, { Configuracoes, TipoMensagem } from '../../../../model/modelos';
 import { ConfiguracoesService } from '../../../../services/configuracoes.service';
 import { MensagensComponent } from '../../../mensagens/mensagens/mensagens.component';
 
 @Component({
   selector: 'app-modal-configuracao',
   imports: [
-      CommonModule,
-      FormsModule,
-      MensagensComponent
-    ],
+    CommonModule,
+    FormsModule,
+    MensagensComponent
+  ],
   templateUrl: './modal-configuracao.component.html',
   styleUrl: './modal-configuracao.component.scss'
 })
 export class ModalConfiguracaoComponent {
   protected visivel = signal<boolean>(false);
 
-  @Input() configuracoes: Partial<Configuracoes> | undefined;
-  @Output() configuracoesSalvas = new EventEmitter<void>();
+  @Input() configuracoes: Configuracoes | undefined;
+  @Output() configuracoesSalvas = new EventEmitter<Configuracoes | undefined>();
 
   @ViewChild('mensagemComponente') mensagemComponente: MensagensComponent | undefined;
 
@@ -50,7 +50,7 @@ export class ModalConfiguracaoComponent {
     if (this.configuracoes) {
       this.configuracoesService.updateConfiguracao(1, this.configuracoes).subscribe({
         next: (res) => {
-          this.configuracoesSalvas.emit();
+          !!this.configuracoesSalvas && this.configuracoesSalvas.emit(this.configuracoes);
           this.mensagemComponente?.show('Configurações Salvas', TipoMensagem.SUCESSO, 700);
           setTimeout(() => { this.hide(); }, 300);
         },
@@ -58,6 +58,11 @@ export class ModalConfiguracaoComponent {
         complete: () => { }
       });
     }
+  }
+
+  protected resetar(): void {
+    this.configuracoes = getDefaultPartialConfig() as Configuracoes;
+    this.salvar();
   }
 
 }

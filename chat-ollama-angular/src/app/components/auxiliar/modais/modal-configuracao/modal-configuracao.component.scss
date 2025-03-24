@@ -130,6 +130,12 @@ $cor-background: #ddd;
     }
 }
 
+.resetar {
+    &:hover {
+        background-color: $cor-background;
+    }
+}
+
 .deletar {
     background-color: $cor-deletar;
     color: white;

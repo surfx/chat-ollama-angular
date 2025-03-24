@@ -9,6 +9,8 @@ export interface Configuracoes {
 
 export default function getDefaultPartialConfig(): Partial<Configuracoes> {
     return {
+        id: "1",
+        ollama_api: "http://localhost:11434",
         configuracoes: {
             modo: 'rag', temperatura: 0.7
         },
