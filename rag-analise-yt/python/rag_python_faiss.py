@@ -1,21 +1,57 @@
-# Como executar:
-# cd E:\programas\ia\virtual_environment && my_env_3129\Scripts\activate
-# uv run D:\meus_documentos\workspace\ia\chat-ollama-angular\rag-analise-yt\python\rag_python_faiss.py
-
-# DELETAR PATH_ARQUIVOS
-# PATH_ARQUIVOS = r"D:\meus_documentos\workspace\ia\chat-ollama-angular\rag-analise-yt\data"
-LANG = "por" # por | eng
-# Diretório onde o banco de dados será salvo
-persist_directory = r"/home/emerson/projetos/chat-ollama-angular/db"
-local_model = "deepseek-r1" # deepseek-r1 | llama3.2
-embedding_model_name = 'nomic-embed-text' # nomic-embed-text | llama3
-extensoes_imagens = ['.jpg', '.jpeg', '.png', '.gif', '.bmp'] # Adicione outras extensões se necessário
+# cd /home/emerson/projetos/chat-ollama-angular/rag-analise-yt/; ./run.sh
+# ou
+# cd /tmp/uv_environments; source my_env_3129/bin/activate
+# uv run /home/emerson/projetos/chat-ollama-angular/rag-analise-yt/python/flask_server/server_flask_faiss.py
 
 import os
 import faiss
 from langchain_community.vectorstores import FAISS
 from langchain_community.docstore.in_memory import InMemoryDocstore
 from langchain_ollama import OllamaEmbeddings
+
+class ConfigData:
+    LANG = "por" # por | eng
+    # Diretório onde o banco de dados será salvo
+    PERSIST_DB_DIRECTORY = r"/home/emerson/projetos/chat-ollama-angular/db"
+    UPLOAD_PATH_TEMP = r"/home/emerson/projetos/chat-ollama-angular/temp"  # Pasta onde os arquivos serão salvos no servidor
+
+    LOCAL_MODEL = "deepseek-r1" # deepseek-r1 | llama3.2
+    EMBEDDING_MODEL_NAME = 'nomic-embed-text' # nomic-embed-text | llama3
+
+    ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'html'} # Extensões permitidas (opcional)
+    EXTENSOES_IMAGENS = ['.jpg', '.jpeg', '.png', '.gif', '.bmp'] # Adicione outras extensões se necessário
+
+    def __init__(self,
+                 lang=LANG,
+                 persist_db_directory=PERSIST_DB_DIRECTORY,
+                 upload_path_temp=UPLOAD_PATH_TEMP,
+                 local_model=LOCAL_MODEL,
+                 embedding_model_name=EMBEDDING_MODEL_NAME,
+                 allowed_extensions=ALLOWED_EXTENSIONS,
+                 extensoes_imagens=EXTENSOES_IMAGENS):
+        self.LANG = lang
+        self.PERSIST_DB_DIRECTORY = persist_db_directory
+        self.UPLOAD_PATH_TEMP = upload_path_temp
+        self.LOCAL_MODEL = local_model
+        self.EMBEDDING_MODEL_NAME = embedding_model_name
+        self.ALLOWED_EXTENSIONS = set(allowed_extensions)
+        self.EXTENSOES_IMAGENS = set(extensoes_imagens)
+
+        if not os.path.exists(self.PERSIST_DB_DIRECTORY): os.makedirs(self.PERSIST_DB_DIRECTORY, exist_ok=True)
+        if not os.path.exists(self.UPLOAD_PATH_TEMP): os.makedirs(self.UPLOAD_PATH_TEMP, exist_ok=True)
+
+    def __str__(self):
+        return (f"ConfigData(\n"
+                f"  LANG='{self.LANG}',\n"
+                f"  PERSIST_DB_DIRECTORY='{self.PERSIST_DB_DIRECTORY}',\n"
+                f"  UPLOAD_PATH_TEMP='{self.UPLOAD_PATH_TEMP}',\n"
+                f"  LOCAL_MODEL='{self.LOCAL_MODEL}',\n"
+                f"  EMBEDDING_MODEL_NAME='{self.EMBEDDING_MODEL_NAME}',\n"
+                f"  ALLOWED_EXTENSIONS={self.ALLOWED_EXTENSIONS}\n"
+                f"  EXTENSOES_IMAGENS={self.EXTENSOES_IMAGENS}\n"
+                f")")
+
+configData = ConfigData()
 
 #region torch
 import torch
@@ -114,7 +150,7 @@ class DoclingAuxiliar:
             do_ocr=True,  # Enable OCR
             # full page ocr and language selection
             #ocr_options=EasyOcrOptions(force_full_page_ocr=True, lang=["en"]),  # Use EasyOCR for OCR
-            ocr_options=TesseractOcrOptions(force_full_page_ocr=True, lang=[LANG]),  # Uncomment to use Tesseract for OCR
+            ocr_options=TesseractOcrOptions(force_full_page_ocr=True, lang=[configData.LANG]),  # Uncomment to use Tesseract for OCR
             #ocr_options = OcrMacOptions(force_full_page_ocr=True, lang=['en-US']),
             table_structure_options=dict(
                 do_cell_matching=False,  # Use text cells predicted from table structure model
@@ -179,7 +215,7 @@ class SepararDocumentos:
                 nome_arquivo, extensao = os.path.splitext(arquivo)
                 extensao = extensao.lower()
 
-                if extensao in extensoes_imagens:
+                if extensao in configData.EXTENSOES_IMAGENS:
                     imagens.append(caminho_arquivo) #adiciona o caminho completo
                 else:
                     documentos.append(caminho_arquivo) #adiciona o caminho completo
@@ -236,13 +272,13 @@ class ChunksAux:
     def get_chunks_image(self, local_path):
         if (local_path is None): return None
         image = Image.open(local_path)
-        extracted_text = pytesseract.image_to_string(image, lang=LANG)
+        extracted_text = pytesseract.image_to_string(image, lang=configData.LANG)
 
         documento = Document(page_content=extracted_text, metadata={"source": local_path})
         chunks = self.text_splitter.split_documents([documento])
         return chunks
     
-    def get_chunks_image_file(self, caminho_arquivo, lang=LANG):
+    def get_chunks_image_file(self, caminho_arquivo, lang=configData.LANG):
         if (caminho_arquivo is None or not os.path.exists(caminho_arquivo)): return None
 
         try:
@@ -259,10 +295,10 @@ class ChunksAux:
                 print(f"Erro ao deletar arquivo '{caminho_arquivo}': {e}")
         return None
 
-    def get_chunks_file(self, caminho_arquivo, lang=LANG):
+    def get_chunks_file(self, caminho_arquivo, lang=configData.LANG):
         _, extensao = os.path.splitext(caminho_arquivo)
         return self.get_chunks_image_file(caminho_arquivo, lang) \
-                if extensao in extensoes_imagens else \
+                if extensao in configData.EXTENSOES_IMAGENS else \
                 self.get_chunks_doc_file(caminho_arquivo)
 
 

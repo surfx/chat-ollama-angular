@@ -28,6 +28,7 @@ ollama pull gemma3:27b
 ollama pull deepseek-r1:32b
 ollama pull llama3.2:3b
 ollama pull nomic-embed-text
+ollama pull llama3.2-vision:11b
 ```
 
 ## 3. Uv (Windows)

@@ -3,7 +3,7 @@ import { Component, signal, ViewChild, ViewEncapsulation } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ModelResponse } from 'ollama';
 import { delay } from 'rxjs';
-import { Configuracoes, ModosValidos, StatusIndexacao, TipoMensagem, UnifiedChatResponse } from '../../model/modelos';
+import getDefaultPartialConfig, { Configuracoes, ModosValidos, StatusIndexacao, TipoMensagem, UnifiedChatResponse } from '../../model/modelos';
 import { ConfiguracoesService } from '../../services/configuracoes.service';
 import { OllamaChatService } from '../../services/ollama-chat.service';
 import { PythonRagService } from '../../services/python-rag.service';
@@ -39,17 +39,8 @@ export class ChatOllamaPageComponent {
   @ViewChild('modalRagComponent') modalRagComponent: ModalRagComponent | undefined;
   @ViewChild('modalConfiguracaoComponent') modalConfiguracaoComponent: ModalConfiguracaoComponent | undefined;
 
-  public configuracoes: Partial<Configuracoes> = {
-    configuracoes: {
-      modo: 'chat',
-      temperatura: 0.7,
-    },
-    configuracoesRAG: {
-      urlServico: 'http://127.0.0.1:5000/'
-    }
-  };
+  public configuracoes: Partial<Configuracoes> = getDefaultPartialConfig();
   private readonly defaultId = 1;
-  protected selectedModel: string = '';
   protected userPrompt: string = '';
   protected modelos: ModelResponse[] | undefined;
   protected isServerOnline = signal(false);
@@ -65,16 +56,18 @@ export class ChatOllamaPageComponent {
       next: (res) => {
         this.configuracoes = res;
         if (this.configuracoes.ollama_api) this.ollamaChatService.setHost(this.configuracoes.ollama_api);
+        this.atualizarConfiguracoesRAG();
       },
       error: (err) => console.error(err),
       complete: () => { }
     });
 
-
     this.ollamaChatService.listaModelos().pipe(delay(500)).subscribe({
       next: (res) => {
         this.modelos = res;
-        this.selectedModel = (!!res && res.length > 0) ? res[0].name : '';
+        if (!this.configuracoes!.configuracoesRAG!.localModel) {
+          this.configuracoes!.configuracoesRAG!.localModel = (!!res && res.length > 0) ? res[0].name : '';
+        }
         this.isServerOnline.set(true);
       },
       error: (err) => { console.error(err); this.isServerOnline.set(false); },
@@ -127,10 +120,12 @@ export class ChatOllamaPageComponent {
 
   public btnEnviarMensagem(): void {
     if (!this.userPrompt || this.userPrompt.trim().length <= 0) { this.mensagemComponente?.show('Informe a mensagem', TipoMensagem.ALERTA, 700); this.scrollMsgAppMensagem(); return; }
-    if (!this.selectedModel || this.selectedModel.trim().length <= 0) { this.mensagemComponente?.show('Selecione o modelo', TipoMensagem.ALERTA, 700); this.scrollMsgAppMensagem(); return; }
+    if (!this.configuracoes!.configuracoesRAG!.localModel || this.configuracoes!.configuracoesRAG!.localModel.trim().length <= 0) {
+      this.mensagemComponente?.show('Selecione o modelo', TipoMensagem.ALERTA, 700); this.scrollMsgAppMensagem(); return;
+    }
 
-    let temperatura = this.configuracoes.configuracoes!.temperatura;
-    if (!temperatura || temperatura < 0) { temperatura = 0.7; this.configuracoes.configuracoes!.temperatura = temperatura; }
+    let temperatura = this.configuracoes?.configuracoes!.temperatura || 0.7;
+    if (!temperatura || temperatura < 0) { temperatura = 0.7; this.configuracoes!.configuracoes!.temperatura = temperatura; }
 
     this.toggleForm(true);
     this.updateChatTxt(this.userPrompt);
@@ -152,7 +147,7 @@ export class ChatOllamaPageComponent {
       this.btnAbortarMensagem();
     };
 
-    if (this.configuracoes.configuracoes?.modo === 'rag') {
+    if (this.configuracoes?.configuracoes?.modo === 'rag') {
       this.pythonRagService.statusService().subscribe({
         next: (res) => {
           if (!res || !res.success) {
@@ -182,8 +177,8 @@ export class ChatOllamaPageComponent {
 
     let index = -1;
     this.ollamaChatService.consultaOllama(
-      this.configuracoes.configuracoes?.modo,
-      this.userPrompt, this.selectedModel, temperatura,
+      this.configuracoes?.configuracoes?.modo,
+      this.userPrompt, this.configuracoes!.configuracoesRAG!.localModel, temperatura,
       this.appchatdisplay?.getHistorico() ?? [],
       this.images
     ).subscribe({
@@ -248,12 +243,13 @@ export class ChatOllamaPageComponent {
     this.salvarConfiguracoes();
   }
 
-  private salvarConfiguracoes(showMessage = false): void {
+  protected salvarConfiguracoes(showMessage = false): void {
     if (!this.configuracoes || !this.configuracoes.ollama_api) { return; }
     this.ollamaChatService.setHost(this.configuracoes.ollama_api);
 
     this.configuracoesService.updateConfiguracao(this.defaultId, this.configuracoes).subscribe({
       next: (res) => {
+        this.atualizarConfiguracoesRAG();
         if (!showMessage) { return; }
         this.mensagensOverlayComponent?.show('Configurações Salvas', TipoMensagem.SUCESSO, 700);
       },
@@ -359,6 +355,15 @@ export class ChatOllamaPageComponent {
     let btnEnviar = document.getElementById('btnEnviar') as HTMLButtonElement;
     if (!btnEnviar) { return; }
     btnEnviar.innerHTML = isLoading ? '<img src="/imagens/loading/infinity2.svg" class="loading_img_chat" alt="">' : 'Enviar';
+  }
+
+  private atualizarConfiguracoesRAG(): void {
+    if (!this.configuracoes.configuracoesRAG) { return; }
+    this.pythonRagService.atualizarConfiguracoesRAG(this.configuracoes.configuracoesRAG)?.subscribe({
+      next: (valor) => {
+        
+      }
+    });
   }
 
 }

@@ -2,7 +2,7 @@ import { HttpClient, HttpEventType, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { interval, Observable, of, EMPTY } from 'rxjs';
 import { catchError, filter, map, switchMap, takeWhile, tap } from 'rxjs/operators';
-import { StatusIndexacao } from '../model/modelos';
+import { ConfiguracoesRAG, StatusIndexacao } from '../model/modelos';
 
 @Injectable({
   providedIn: 'root'
@@ -61,7 +61,7 @@ export class PythonRagService {
   //#endregion
 
   //#region upload files RAG
-  public uploadFilesRag(files: File[]): Observable<{response: any, porcentagem: number}> {
+  public uploadFilesRag(files: File[]): Observable<{ response: any, porcentagem: number }> {
     if (!files || files.length <= 0) return EMPTY; // of(0)
     const url = `${this.apiUrl}upload`;
 
@@ -93,6 +93,36 @@ export class PythonRagService {
     );
   }
   //#endregion
+
+  public atualizarConfiguracoesRAG(configuracoes: ConfiguracoesRAG): Observable<any> | undefined {
+    if (!configuracoes) { return undefined; }
+    const url = `${this.apiUrl}configuracoes`;
+    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+
+    // Converter o objeto ConfiguracoesRAG para snake_case antes de enviar
+    const configuracoesSnakeCase = this.camelToSnakeCase(configuracoes);
+    return this.http.post(url, configuracoesSnakeCase, { headers });
+  }
+
+
+  private camelToSnakeCase(obj: any): any {
+    if (obj === null || typeof obj !== 'object') {
+      return obj;
+    }
+
+    if (Array.isArray(obj)) {
+      return obj.map(this.camelToSnakeCase);
+    }
+
+    const newObj: any = {};
+    for (const key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        const snakeKey = key.replace(/([A-Z])/g, '_$1').toLowerCase();
+        newObj[snakeKey] = this.camelToSnakeCase(obj[key]);
+      }
+    }
+    return newObj;
+  }
 
 }
 

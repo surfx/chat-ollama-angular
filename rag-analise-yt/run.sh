@@ -16,8 +16,7 @@ fnKillPID() {
 
 fnKillPID "${portas[@]}"
 
-cd "/tmp/uv_environments"
-source my_env_3129/bin/activate
+cd /tmp/uv_environments; source my_env_3129/bin/activate
 uv run /home/emerson/projetos/chat-ollama-angular/rag-analise-yt/python/flask_server/server_flask_faiss.py &
 FLASK_PID=$!
 

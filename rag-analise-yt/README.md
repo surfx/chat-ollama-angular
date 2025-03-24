@@ -64,8 +64,7 @@ Este foi configurado para uma pasta diferente do projeto (E:\programas\ia\virtua
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
 uv python install 3.12.9
-path_environments="/tmp/uv_environments"
-mkdir "$path_environments"; cd "$path_environments"
+cd /tmp/uv_environments
 uv venv --python 3.12.9 my_env_3129
 source my_env_3129/bin/activate
 uv pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu126
@@ -183,6 +182,7 @@ ollama pull gemma3:27b
 ollama pull deepseek-r1:32b
 ollama pull llama3.2:3b
 ollama pull nomic-embed-text
+ollama pull llama3.2-vision:11b
 ```
 
 Após a instalação do Ollama, execute com: `ollama serve`

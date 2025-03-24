@@ -23,7 +23,9 @@
     <footer class="footer">
         
         <div class="model-config">
-            <select [(ngModel)]="selectedModel" id="selModelos" [disabled]="!isServerOnline()">
+            <select [(ngModel)]="this.configuracoes.configuracoesRAG!.localModel"
+                (change)="salvarConfiguracoes(false)"
+                id="selModelos" [disabled]="!isServerOnline()">
                 @if (!modelos || modelos.length <= 0) {
                     <option value="loading">Loading models...</option>
                 } @else {
@@ -60,7 +62,11 @@
             </div> -->
             <div class="config-temperature">
                 <label for="temperature">Temperatura</label>
-                <input type="range" id="temperature" min="0" max="2" step="0.1" [(ngModel)]="configuracoes.configuracoes!.temperatura" [disabled]="!isServerOnline()"> {{configuracoes.configuracoes!.temperatura}}
+                <input type="range" id="temperature" min="0" max="2" step="0.1"
+                    [(ngModel)]="configuracoes.configuracoes!.temperatura" [disabled]="!isServerOnline()"
+                    (change)="salvarConfiguracoes(false)"
+                >
+                    {{configuracoes.configuracoes!.temperatura}}
             </div>
         </div>
         

@@ -47,3 +47,4 @@ rag-analise-yt/python/__pycache__/rag_python_faiss.cpython-313.pyc
 data/
 db/index.faiss
 db/index.pkl
+arquivos_analise/

@@ -7,6 +7,24 @@ export interface Configuracoes {
     configuracoesRAG: ConfiguracoesRAG;
 }
 
+export default function getDefaultPartialConfig(): Partial<Configuracoes> {
+    return {
+        configuracoes: {
+            modo: 'rag', temperatura: 0.7
+        },
+        configuracoesRAG: {
+            urlServico: 'http://127.0.0.1:5000/',
+            lang: 'por',
+            persistDbDirectory: '/home/emerson/projetos/chat-ollama-angular/db', // faiss
+            uploadPathTemp: '/home/emerson/projetos/chat-ollama-angular/temp', // upload temp
+            localModel: 'deepseek-r1', // ex: deepseek-r1 | llama3.2
+            embeddingModelName: 'nomic-embed-text', // ex: nomic-embed-text | llama3
+            allowedExtensions: ['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'html'], // sem uso por hora
+            extensoesImagens: ['.jpg', '.jpeg', '.png', '.gif', '.bmp'],
+        }
+    };
+}
+
 export const ModosValidos = ['chat', 'generate', 'rag'];
 
 export interface ConfiguracoesClass {
@@ -16,6 +34,13 @@ export interface ConfiguracoesClass {
 
 export interface ConfiguracoesRAG {
     urlServico: string;
+    lang: 'por' | 'eng';
+    persistDbDirectory: string; // faiss
+    uploadPathTemp: string; // upload temp
+    localModel: string; // ex: deepseek-r1 | llama3.2
+    embeddingModelName: string; // ex: nomic-embed-text | llama3
+    allowedExtensions: string[]; // sem uso por hora
+    extensoesImagens: string[];
 }
 
 export enum TipoMensagem {

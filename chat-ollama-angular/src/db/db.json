@@ -5,10 +5,11 @@
       "ollama_api": "http://127.0.0.1:11434",
       "configuracoes": {
         "temperatura": 0.7,
-        "modo": "rag"
+        "modo": "chat"
       },
       "configuracoesRAG": {
-        "urlServico": "http://127.0.0.1:5000/"
+        "urlServico": "http://127.0.0.1:5000/",
+        "localModel": "deepseek-r1:latest"
       }
     }
   ]
