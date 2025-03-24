@@ -51,7 +51,7 @@ class Configuracoes:
 
     def get_vectorstore(self):
         if (self.vectorstore is not None): return self.vectorstore
-        self.vectorstore = self.get_faiss_auxiliar(self.configData.EMBEDDING_MODEL_NAME, self.configData.PERSIST_DB_DIRECTORY).get_vector_store()
+        self.vectorstore = self.get_faiss_auxiliar().get_vector_store()
         return self.vectorstore
 
     def get_faiss_rag(self):
@@ -155,7 +155,7 @@ def funcao_callback_arquivos(future, caminhos_arquivos):
 @app.route('/doQuestion', methods=['GET'])
 def do_question_llm():
     prompt = request.args.get('prompt')
-    rt = "Nenhum parâmetro 'prompt' fornecido." if not prompt else faiss_rag.do_prompt(prompt)
+    rt = "Nenhum parâmetro 'prompt' fornecido." if not prompt else configuracoes.get_faiss_rag().do_prompt(prompt)
     return jsonify({"success": True if prompt else False, "message": rt}), 400 if not prompt else 200
 
 @app.route('/deleteFaiss', methods=['DELETE'])
@@ -219,11 +219,13 @@ def index():
     <html lang="pt-br">
     <head>
         <meta charset="UTF-8">
-        <title>Minha Página Inicial em Python</title>
+        <title>Service Flask docling RAG</title>
     </head>
     <body>
         <h1>Flask server</h1>
 
+        <a href="https://github.com/surfx/chat-ollama-angular" target="_blank">Projeto Git chat-ollama-angular</a>
+        
         <h2>Rag query</h2>
         <pre>curl "http://127.0.0.1:5000/doQuestion?prompt=Como+jogar+monopoly+%3F"</pre>
 
@@ -252,7 +254,7 @@ curl -X POST \
 http://127.0.0.1:5000/configuracoes
         </pre>
 
-        <h2>Configuração Atual</h2>
+        <h2>Atual Configuração</h2>
         <pre>{config_string}</pre>
     </body>
     </html>
