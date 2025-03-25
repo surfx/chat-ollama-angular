@@ -13,6 +13,7 @@ sys.path.append(parent_dir)
 
 import rag_python_faiss as rpf
 
+
 class Configuracoes:
     configData = None
 
@@ -58,14 +59,17 @@ class Configuracoes:
         if (self.faiss_rag is not None): return self.faiss_rag
         self.faiss_rag = rpf.FaissRAG(
             self.get_vectorstore(), 
-            self.configData.EMBEDDING_MODEL_NAME, self.configData.PERSIST_DB_DIRECTORY, self.configData.LOCAL_MODEL
+            self.configData.QUERY_PROMPT,
+            self.configData.EMBEDDING_MODEL_NAME,
+            self.configData.PERSIST_DB_DIRECTORY,
+            self.configData.LOCAL_MODEL
         )
         return self.faiss_rag
 
     def get_faiss_batch(self):
         if (self.faiss_batch is not None): return self.faiss_batch
         self.faiss_batch = rpf.FaissBatch(vectorstore = 
-            self.get_vectorstore(self.configData.EMBEDDING_MODEL_NAME, self.configData.PERSIST_DB_DIRECTORY)
+            self.get_vectorstore()
         )
         return self.faiss_batch
 
@@ -96,8 +100,8 @@ def configuracoes_post():
                 setattr(rpf.configData, key.upper(), value) # Atualiza o atributo de configData
 
         # configuracoes = ConfigData(**config_data_json) # Instancia ConfigData com os dados do JSON
-        print("Configurações Recebidas:")
-        print(rpf.configData)
+        # print("Configurações Recebidas:")
+        # print(rpf.configData)
 
         configuracoes = Configuracoes(rpf.configData)
 
@@ -172,6 +176,20 @@ def status_service():
 def status_indexacao_func():
     return jsonify(configuracoes.get_faiss_batch().status_indexacao), 200
 
+@app.route('/configuracaoAtual')
+def configuracao_atual():
+    config = configuracoes.configData
+    config_dict = { # Manually convert to dictionary
+        'LANG': config.LANG,
+        'PERSIST_DB_DIRECTORY': config.PERSIST_DB_DIRECTORY,
+        'UPLOAD_PATH_TEMP': config.UPLOAD_PATH_TEMP,
+        'LOCAL_MODEL': config.LOCAL_MODEL,
+        'EMBEDDING_MODEL_NAME': config.EMBEDDING_MODEL_NAME,
+        'ALLOWED_EXTENSIONS': list(config.ALLOWED_EXTENSIONS),
+        'EXTENSOES_IMAGENS': list(config.EXTENSOES_IMAGENS)
+    }
+    return jsonify(config_dict), 200 # jsonify the dictionary
+
 # -----------------------------
 # UPLOAD FILES
 # -----------------------------
@@ -188,7 +206,7 @@ def upload_file():
     for file in files:
         if file.filename == '': return jsonify({"success": False, "message": "Um ou mais arquivos sem nome"}), 400
 
-    lista_caminhos_arquivos = salvar_arquivos_temp(files, configuracoes.UPLOAD_PATH_TEMP)
+    lista_caminhos_arquivos = salvar_arquivos_temp(files, configuracoes.configData.UPLOAD_PATH_TEMP)
     if (lista_caminhos_arquivos is None or len(lista_caminhos_arquivos) <= 0):
         return jsonify({"success": False, "message": "Sem arquivos válidos para indexação"}), 200
 
@@ -238,11 +256,16 @@ def index():
         <h2>Status indexação (polling)</h2>
         <pre>curl http://127.0.0.1:5000/statusIndexacao</pre>
 
+        <h2>Configuração Atual</h2>
+        <pre>curl http://localhost:5000/configuracaoAtual</pre>
+        
+
         <h2>Update Config</h2>
         <pre>
 curl -X POST \
 -H "Content-Type: application/json" \
 -d '{{
+    "query_prompt": "novo query prompt...",
     "lang": "por",
     "persist_db_directory": "/home/emerson/projetos/chat-ollama-angular/db",
     "upload_path_temp": "/home/emerson/projetos/chat-ollama-angular/temp",
@@ -254,7 +277,28 @@ curl -X POST \
 http://127.0.0.1:5000/configuracoes
         </pre>
 
-        <h2>Atual Configuração</h2>
+        <h2>Upload example</h2>
+        <pre>
+curl 'http://127.0.0.1:5000/upload' \
+  -H 'Accept: application/json, text/plain, */*' \
+  -H 'Accept-Language: pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7' \
+  -H 'Connection: keep-alive' \
+  -H 'Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryP9IhvgxGJbinBGj2' \
+  -H 'DNT: 1' \
+  -H 'Origin: http://localhost:4200' \
+  -H 'Referer: http://localhost:4200/' \
+  -H 'Sec-Fetch-Dest: empty' \
+  -H 'Sec-Fetch-Mode: cors' \
+  -H 'Sec-Fetch-Site: cross-site' \
+  -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36' \
+  -H 'sec-ch-ua: "Chromium";v="134", "Not:A-Brand";v="24", "Google Chrome";v="134"' \
+  -H 'sec-ch-ua-mobile: ?0' \
+  -H 'sec-ch-ua-platform: "Windows"' \
+  -H 'sec-gpc: 1' \
+  --data-raw $'------WebKitFormBoundaryP9IhvgxGJbinBGj2\r\nContent-Disposition: form-data; name="files"; filename="486377-2048x1310-desktop-hd-blade-runner-2049-background-photo.jpg"\r\nContent-Type: image/jpeg\r\n\r\n\r\n------WebKitFormBoundaryP9IhvgxGJbinBGj2--\r\n'
+        </pre>
+
+        <h2>Configuração Atual</h2>
         <pre>{config_string}</pre>
     </body>
     </html>
@@ -292,3 +336,22 @@ if __name__ == '__main__':
 #  curl -X DELETE "http://127.0.0.1:5000/deleteFaiss"
 #  curl "http://127.0.0.1:5000/status"
 #  curl http://127.0.0.1:5000/statusIndexacao
+#  curl http://localhost:5000/configuracaoAtual
+# upload
+#  curl 'http://127.0.0.1:5000/upload' \
+#    -H 'Accept: application/json, text/plain, */*' \
+#    -H 'Accept-Language: pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7' \
+#    -H 'Connection: keep-alive' \
+#    -H 'Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryP9IhvgxGJbinBGj2' \
+#    -H 'DNT: 1' \
+#    -H 'Origin: http://localhost:4200' \
+#    -H 'Referer: http://localhost:4200/' \
+#    -H 'Sec-Fetch-Dest: empty' \
+#    -H 'Sec-Fetch-Mode: cors' \
+#    -H 'Sec-Fetch-Site: cross-site' \
+#    -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36' \
+#    -H 'sec-ch-ua: "Chromium";v="134", "Not:A-Brand";v="24", "Google Chrome";v="134"' \
+#    -H 'sec-ch-ua-mobile: ?0' \
+#    -H 'sec-ch-ua-platform: "Windows"' \
+#    -H 'sec-gpc: 1' \
+#    --data-raw $'------WebKitFormBoundaryP9IhvgxGJbinBGj2\r\nContent-Disposition: form-data; name="files"; filename="486377-2048x1310-desktop-hd-blade-runner-2049-background-photo.jpg"\r\nContent-Type: image/jpeg\r\n\r\n\r\n------WebKitFormBoundaryP9IhvgxGJbinBGj2--\r\n'

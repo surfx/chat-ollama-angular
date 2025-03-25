@@ -29,12 +29,18 @@
                 <input type="text" [(ngModel)]="configuracoes!.configuracoesRAG!.uploadPathTemp">
                 <label>modelo local</label>
                 <input type="text" [(ngModel)]="configuracoes!.configuracoesRAG!.localModel" disabled="disabled">
+                <label>modo</label>
+                <input type="text" [(ngModel)]="configuracoes!.configuracoes!.modo" disabled="disabled">
+                <label>temperatura</label>
+                <input type="text" [(ngModel)]="configuracoes!.configuracoes!.temperatura" disabled="disabled">
                 <label>embedding model</label>
                 <input type="text" [(ngModel)]="configuracoes!.configuracoesRAG!.embeddingModelName">
                 <label>extensões permitidas</label>
                 <input type="text" [(ngModel)]="configuracoes!.configuracoesRAG!.allowedExtensions">
                 <label>extensões imagens</label>
                 <input type="text" [(ngModel)]="configuracoes!.configuracoesRAG!.extensoesImagens">
+                <label>query prompt</label>
+                <textarea [(ngModel)]="configuracoes!.query_prompt" rows="5" cols="30"></textarea>
 
                 <!-- <label>pasta</label>
                 <div class="div-selecao-pasta">

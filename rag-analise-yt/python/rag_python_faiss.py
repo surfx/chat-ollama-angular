@@ -10,6 +10,13 @@ from langchain_community.docstore.in_memory import InMemoryDocstore
 from langchain_ollama import OllamaEmbeddings
 
 class ConfigData:
+    QUERY_PROMPT = """
+    Você é um assistente de modelo de linguagem de IA. Sua tarefa é gerar cinco
+    versões diferentes da pergunta do usuário fornecida para recuperar documentos relevantes de
+    um banco de dados vetorial. Ao gerar múltiplas perspectivas sobre a pergunta do usuário, seu
+    objetivo é ajudar o usuário a superar algumas das limitações da pesquisa de similaridade 
+    baseada em distância. Forneça essas perguntas alternativas separadas por quebras de linha.
+    """
     LANG = "por" # por | eng
     # Diretório onde o banco de dados será salvo
     PERSIST_DB_DIRECTORY = r"/home/emerson/projetos/chat-ollama-angular/db"
@@ -22,6 +29,7 @@ class ConfigData:
     EXTENSOES_IMAGENS = ['.jpg', '.jpeg', '.png', '.gif', '.bmp'] # Adicione outras extensões se necessário
 
     def __init__(self,
+                 query_prompt=QUERY_PROMPT,
                  lang=LANG,
                  persist_db_directory=PERSIST_DB_DIRECTORY,
                  upload_path_temp=UPLOAD_PATH_TEMP,
@@ -29,6 +37,7 @@ class ConfigData:
                  embedding_model_name=EMBEDDING_MODEL_NAME,
                  allowed_extensions=ALLOWED_EXTENSIONS,
                  extensoes_imagens=EXTENSOES_IMAGENS):
+        self.QUERY_PROMPT = query_prompt
         self.LANG = lang
         self.PERSIST_DB_DIRECTORY = persist_db_directory
         self.UPLOAD_PATH_TEMP = upload_path_temp
@@ -42,6 +51,7 @@ class ConfigData:
 
     def __str__(self):
         return (f"ConfigData(\n"
+                f"  QUERY_PROMPT='{self.QUERY_PROMPT}',\n"
                 f"  LANG='{self.LANG}',\n"
                 f"  PERSIST_DB_DIRECTORY='{self.PERSIST_DB_DIRECTORY}',\n"
                 f"  UPLOAD_PATH_TEMP='{self.UPLOAD_PATH_TEMP}',\n"
@@ -50,6 +60,22 @@ class ConfigData:
                 f"  ALLOWED_EXTENSIONS={self.ALLOWED_EXTENSIONS}\n"
                 f"  EXTENSOES_IMAGENS={self.EXTENSOES_IMAGENS}\n"
                 f")")
+
+    def __json__(self):
+        """
+        Método para tornar o objeto ConfigData serializável em JSON.
+        Converte o objeto em um dicionário que pode ser serializado.
+        """
+        return {
+            'QUERY_PROMPT': self.QUERY_PROMPT,
+            'LANG': self.LANG,
+            'PERSIST_DB_DIRECTORY': self.PERSIST_DB_DIRECTORY,
+            'UPLOAD_PATH_TEMP': self.UPLOAD_PATH_TEMP,
+            'LOCAL_MODEL': self.LOCAL_MODEL,
+            'EMBEDDING_MODEL_NAME': self.EMBEDDING_MODEL_NAME,
+            'ALLOWED_EXTENSIONS': list(self.ALLOWED_EXTENSIONS), # Sets não são serializáveis em JSON por padrão
+            'EXTENSOES_IMAGENS': list(self.EXTENSOES_IMAGENS)   # Sets não são serializáveis em JSON por padrão
+        }
 
 configData = ConfigData()
 
@@ -493,11 +519,12 @@ class FaissRAG:
 
     QUERY_PROMPT = PromptTemplate(
         input_variables=["question"],
-        template="""Você é um assistente de modelo de linguagem de IA. Sua tarefa é gerar cinco
-        versões diferentes da pergunta do usuário fornecida para recuperar documentos relevantes de
-        um banco de dados vetorial. Ao gerar múltiplas perspectivas sobre a pergunta do usuário, seu
-        objetivo é ajudar o usuário a superar algumas das limitações da pesquisa de similaridade 
-        baseada em distância. Forneça essas perguntas alternativas separadas por quebras de linha.
+        template="""Você é um assistente de modelo de linguagem de IA. 
+        Sua tarefa é gerar respostas da pergunta do usuário fornecida para recuperar 
+        documentos relevantes de um banco de dados vetorial. Ao gerar múltiplas
+        perspectivas sobre a pergunta do usuário, seu objetivo é ajudar o usuário a 
+        superar algumas das limitações da pesquisa de similaridade baseada em distância.
+        Forneça sua resposta em formato markdown. 
         Pergunta original: {question}""",
     )
 
@@ -509,13 +536,16 @@ class FaissRAG:
 
     #embedding_model_name = 'nomic-embed-text' # nomic-embed-text | llama3
     #local_model = deepseek-r1 | llama3.2
-    def __init__(self, vectorstore=None, embedding_model_name=None, persist_directory=None, local_model="deepseek-r1"):
+    def __init__(self, vectorstore=None, query_prompt=QUERY_PROMPT.template, embedding_model_name=None, persist_directory=None, local_model="deepseek-r1"):
         if vectorstore is not None:
             self.vectorstore = vectorstore
         elif embedding_model_name is not None and persist_directory is not None:
             self.vectorstore = FaissAuxiliar(embedding_model_name, persist_directory)
         else:
             raise ValueError("Você deve fornecer 'vectorstore' ou 'embedding_model_name' e 'persist_directory'.")
+
+        if query_prompt is not None:
+            self.QUERY_PROMPT.template = query_prompt + " Pergunta original: {question}"
 
         llm = ChatOllama(model=local_model) # LLM from Ollama
 
