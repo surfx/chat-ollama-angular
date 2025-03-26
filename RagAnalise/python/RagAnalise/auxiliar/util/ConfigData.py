@@ -1,5 +1,10 @@
 # -*- coding: latin-1 -*-
 import os
+from enum import Enum
+
+class ETipoDB(Enum):
+    Faiss = 1
+    Chroma = 2
 
 class ConfigData:
 
@@ -11,16 +16,18 @@ class ConfigData:
     baseada em distância. Forneça essas perguntas alternativas separadas por quebras de linha.
     """
     LANG: str = "por"  # por | eng
-    PERSIST_DB_DIRECTORY: str = r"C:\Users\emerson\Desktop\projetos\pastas_aux"
-    UPLOAD_PATH_TEMP: str = r"C:\Users\emerson\Desktop\projetos\pastas_aux"
-    #PERSIST_DB_DIRECTORY: str = r"/home/emerson/projetos/chat-ollama-angular/db" # Diretório onde o banco de dados será salvo
-    #UPLOAD_PATH_TEMP: str = r"/home/emerson/projetos/chat-ollama-angular/temp"  # Pasta temporária
+    #PERSIST_DB_DIRECTORY: str = r"C:\Users\emerson\Desktop\projetos\pastas_aux"
+    #UPLOAD_PATH_TEMP: str = r"C:\Users\emerson\Desktop\projetos\pastas_aux"
+    PERSIST_DB_DIRECTORY: str = r"/home/emerson/projetos/chat-ollama-angular/db" # Diretório onde o banco de dados será salvo
+    UPLOAD_PATH_TEMP: str = r"/home/emerson/projetos/chat-ollama-angular/temp"  # Pasta temporária
 
     LOCAL_MODEL: str = "deepseek-r1"  # deepseek-r1 | llama3.2
     EMBEDDING_MODEL_NAME: str = 'nomic-embed-text'  # nomic-embed-text | llama3
 
     ALLOWED_EXTENSIONS: set[str] = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'html'}
     EXTENSOES_IMAGENS: set[str] = {'.jpg', '.jpeg', '.png', '.gif', '.bmp'}
+
+    USE_DB:ETipoDB = ETipoDB.Faiss
 
     def __init__(self,
                  query_prompt: str = QUERY_PROMPT,
@@ -30,7 +37,9 @@ class ConfigData:
                  local_model: str = LOCAL_MODEL,
                  embedding_model_name: str = EMBEDDING_MODEL_NAME,
                  allowed_extensions: set[str] = ALLOWED_EXTENSIONS,
-                 extensoes_imagens: set[str] = EXTENSOES_IMAGENS) -> None:
+                 extensoes_imagens: set[str] = EXTENSOES_IMAGENS,
+                 use_db:ETipoDB = USE_DB
+                 ) -> None:
         self.QUERY_PROMPT = query_prompt
         self.LANG = lang
         self.PERSIST_DB_DIRECTORY = persist_db_directory
@@ -39,6 +48,7 @@ class ConfigData:
         self.EMBEDDING_MODEL_NAME = embedding_model_name
         self.ALLOWED_EXTENSIONS = set(allowed_extensions)
         self.EXTENSOES_IMAGENS = set(extensoes_imagens)
+        self.USE_DB = use_db
 
         if not os.path.exists(self.PERSIST_DB_DIRECTORY):
             os.makedirs(self.PERSIST_DB_DIRECTORY, exist_ok=True)
@@ -53,8 +63,9 @@ class ConfigData:
                 f"  UPLOAD_PATH_TEMP='{self.UPLOAD_PATH_TEMP}',\n"
                 f"  LOCAL_MODEL='{self.LOCAL_MODEL}',\n"
                 f"  EMBEDDING_MODEL_NAME='{self.EMBEDDING_MODEL_NAME}',\n"
-                f"  ALLOWED_EXTENSIONS={self.ALLOWED_EXTENSIONS}\n"
-                f"  EXTENSOES_IMAGENS={self.EXTENSOES_IMAGENS}\n"
+                f"  ALLOWED_EXTENSIONS={self.ALLOWED_EXTENSIONS},\n"
+                f"  EXTENSOES_IMAGENS={self.EXTENSOES_IMAGENS},\n"
+                f"  USE_DB={self.USE_DB}\n"
                 f")")
 
     def __json__(self) -> dict[str, str | list[str]]:
@@ -62,7 +73,10 @@ class ConfigData:
         Método para tornar o objeto ConfigData serializável em JSON.
         Converte o objeto em um dicionário que pode ser serializado.
         """
-        return {
+        return self.to_dic()
+    
+    def to_dic(self) -> dict[str, str | list[str]]:
+        config_dict = {
             'QUERY_PROMPT': self.QUERY_PROMPT,
             'LANG': self.LANG,
             'PERSIST_DB_DIRECTORY': self.PERSIST_DB_DIRECTORY,
@@ -70,5 +84,7 @@ class ConfigData:
             'LOCAL_MODEL': self.LOCAL_MODEL,
             'EMBEDDING_MODEL_NAME': self.EMBEDDING_MODEL_NAME,
             'ALLOWED_EXTENSIONS': list(self.ALLOWED_EXTENSIONS),
-            'EXTENSOES_IMAGENS': list(self.EXTENSOES_IMAGENS)
+            'EXTENSOES_IMAGENS': list(self.EXTENSOES_IMAGENS),
+            'USE_DB': self.USE_DB.name
         }
+        return config_dict

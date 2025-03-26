@@ -20,6 +20,7 @@ export default function getDefaultPartialConfig(): Partial<Configuracoes> {
         configuracoesRAG: {
             urlServico: 'http://127.0.0.1:5000/',
             lang: 'por',
+            useDb: 'Faiss',
             persistDbDirectory: '/home/emerson/projetos/chat-ollama-angular/db', // faiss
             uploadPathTemp: '/home/emerson/projetos/chat-ollama-angular/temp', // upload temp
             localModel: 'deepseek-r1:latest', // ex: deepseek-r1 | llama3.2
@@ -40,7 +41,8 @@ export interface ConfiguracoesClass {
 export interface ConfiguracoesRAG {
     urlServico: string;
     lang: 'por' | 'eng';
-    persistDbDirectory: string; // faiss
+    useDb: 'Faiss' | 'Chroma';
+    persistDbDirectory: string; // db path
     uploadPathTemp: string; // upload temp
     localModel: string; // ex: deepseek-r1 | llama3.2
     embeddingModelName: string; // ex: nomic-embed-text | llama3

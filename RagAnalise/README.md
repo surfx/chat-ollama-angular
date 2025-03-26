@@ -269,6 +269,8 @@ Devido ao tamanho dos arquivos gerados pelo Chromadb, falha nos métodos de `del
 - [x] Alterar o projeto `RagAnalise` indexação - receber um conjunto de arquivos via POST
 - [x] Criar GET para is alive
 - [x] Parametrizar o serviço
+- [ ] consultar json server - initial load data
+- [ ] corrijir consulta rag chroma
 
 # Créditos
 

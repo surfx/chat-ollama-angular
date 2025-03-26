@@ -46,7 +46,9 @@ Thumbs.db
 data/
 db/index.faiss
 db/index.pkl
+db/chroma.sqlite3
 arquivos_analise/
 RagAnalise/python/.vs/RagAnalise/FileContentIndex/*.vsidx
 RagAnalise/python/.vs/RagAnalise/v17/*
-
+db/
+temp/

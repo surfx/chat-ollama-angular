@@ -97,16 +97,16 @@ export class ModalRagComponent {
 
 
 
-  protected deletarFaiss(): void {
+  protected deletarDB(): void {
     // TODO: criar modal y/n
     if (!confirm('Deseja deletar toda a base de dados RAG ?')) { return; }
 
     this.pythonRagService.deleteDb().subscribe({
       next: (res) => {
-        this.mensagemComponente?.show('Faiss db excluído', TipoMensagem.INFO, 1000);
+        this.mensagemComponente?.show('Db excluído', TipoMensagem.INFO, 1000);
       },
       error: (err) => {
-        this.mensagemComponente?.show('Erro ao excluir o Faiss db', TipoMensagem.ERRO, 1000);
+        this.mensagemComponente?.show('Erro ao excluir o db', TipoMensagem.ERRO, 1000);
       }
     });
   }

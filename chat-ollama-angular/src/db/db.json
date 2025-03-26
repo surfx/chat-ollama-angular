@@ -5,12 +5,13 @@
       "ollama_api": "http://localhost:11434",
       "query_prompt": "Você é um assistente de modelo de linguagem de IA. Sua tarefa é gerar respostas da pergunta do usuário fornecida para recuperar documentos relevantes de um banco de dados vetorial. Ao gerar múltiplas perspectivas sobre a pergunta do usuário, seu objetivo é ajudar o usuário a superar algumas das limitações da pesquisa de similaridade baseada em distância. Forneça sua resposta em formato markdown.",
       "configuracoes": {
-        "modo": "chat",
+        "modo": "rag",
         "temperatura": 0.7
       },
       "configuracoesRAG": {
         "urlServico": "http://127.0.0.1:5000/",
         "lang": "por",
+        "useDb": "Chroma",
         "persistDbDirectory": "/home/emerson/projetos/chat-ollama-angular/db",
         "uploadPathTemp": "/home/emerson/projetos/chat-ollama-angular/temp",
         "localModel": "deepseek-r1:latest",

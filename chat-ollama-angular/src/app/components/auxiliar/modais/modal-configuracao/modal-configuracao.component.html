@@ -21,6 +21,8 @@
                 <input type="text" id="config_ollama_api" [(ngModel)]="configuracoes!.ollama_api" />
                 <label>serviço flask (rag)</label>
                 <input type="text" id="txtUrlServico" [(ngModel)]="configuracoes!.configuracoesRAG!.urlServico">
+                <label>USE DB</label>
+                <input type="text" [(ngModel)]="configuracoes!.configuracoesRAG!.useDb">
                 <label>LANG</label>
                 <input type="text" [(ngModel)]="configuracoes!.configuracoesRAG!.lang">
                 <label>persist db (faiss)</label>

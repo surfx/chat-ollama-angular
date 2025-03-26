@@ -20,7 +20,7 @@ class IndexarArquivos:
 
     def __init__(self, chunkAux: ChunksAux, vectorstore: IVectorStore) -> None:
         # if not isinstance(vectorstore, IVectorStore): raise ValueError("vectorstore deve implementar IVectorStore")
-        if chunkAux is None: raise ValueError("chunkAux È obrigatÛrio")
+        if chunkAux is None: raise ValueError("chunkAux ÔøΩ obrigatÔøΩrio")
         
         self.__vectorstore = vectorstore
         self.__chunkAux = chunkAux
@@ -35,85 +35,131 @@ class IndexarArquivos:
         return f"{base_id}_{page_index}"    
 
     def generate_id(self, document:Document, page_index:int = 0) -> str:
-        """Gera um ID ˙nico baseado no nome do arquivo e no Ìndice da p·gina."""
+        """Gera um ID ÔøΩnico baseado no nome do arquivo e no ÔøΩndice da pÔøΩgina."""
         source = document.metadata['source']
         return self.generate_id_filename(os.path.basename(source), page_index)
 
 
-    def indexing_files(self, lista_caminhos_arquivos:list[str], extensoes_imagens:list[str], lang:str="por", excluir_arquivo:bool = True) -> IVectorStore:
-        if (lista_caminhos_arquivos is None or len(lista_caminhos_arquivos) <= 0): return self.__vectorstore
+    def indexing_files(self, lista_caminhos_arquivos: list[str], extensoes_imagens: list[str], 
+                      lang: str = "por", excluir_arquivo: bool = True) -> IVectorStore:
+        
+        if not lista_caminhos_arquivos: return self.__vectorstore
 
         total_arquivos = len(lista_caminhos_arquivos)
         arquivos_processados = 0
 
         try:
             for caminho_arquivo in lista_caminhos_arquivos:
-                filename = os.path.basename(caminho_arquivo) if caminho_arquivo != '' else ''
-                if caminho_arquivo == '' or filename == '': continue
-                filename = filename.lower()
+                if not caminho_arquivo: continue
+                filename = os.path.basename(caminho_arquivo).lower()
+                if not filename: continue
+
                 document_id = self.generate_id_filename(filename, 0)
-                results = self.__vectorstore.get_by_ids([document_id]);
+                results = self.__vectorstore.get_by_ids([document_id])
 
-                if results and results[0].id and document_id in results[0].id:
-                    print(f"Documento com ID {document_id} | {filename} j· existe na coleÁ„o.")
-                    if excluir_arquivo and os.path.exists(caminho_arquivo): os.remove(caminho_arquivo)
+                if results and isinstance(results, (list, tuple)):  # Verifica se ÔøΩ uma sequÔøΩncia
+                    try:
+                        first_result = results[0]  # Tenta acessar o primeiro elemento
+                        if hasattr(first_result, 'id') and document_id == first_result.id:
+                            print(f"Documento com ID {document_id} | {filename} jÔøΩ existe na coleÔøΩÔøΩo.")
+                            if excluir_arquivo and os.path.exists(caminho_arquivo):
+                                os.remove(caminho_arquivo)
+                            arquivos_processados += 1
+                            self._update_progress(arquivos_processados, total_arquivos)
+                            continue
+                    except (IndexError, AttributeError):
+                        pass  # Se falhar, continua com o processamento normal
 
-                    arquivos_processados += 1
-                    self.status_indexacao["porcentagem"] = int((arquivos_processados / total_arquivos) * 100)
-                    continue
-
-                self.__indexing_batch(filename, self.__chunkAux.get_chunks_file(caminho_arquivo, extensoes_imagens, lang))
+                # Processa o arquivo se nÔøΩo existir ou se a verificaÔøΩÔøΩo falhar
+                chunks = self.__chunkAux.get_chunks_file(caminho_arquivo, extensoes_imagens, lang)
+                self.__indexing_batch(filename, chunks)
+            
                 arquivos_processados += 1
-                self.status_indexacao["porcentagem"] = int((arquivos_processados / total_arquivos) * 100)
-                if excluir_arquivo and os.path.exists(caminho_arquivo): os.remove(caminho_arquivo)
+                self._update_progress(arquivos_processados, total_arquivos)
+            
+                if excluir_arquivo and os.path.exists(caminho_arquivo):
+                    os.remove(caminho_arquivo)
 
-            self.status_indexacao["porcentagem"] = 100
-            self.status_indexacao["terminado"] = True
-
-            if (arquivos_processados>0): self.__vectorstore.persistir()
-        except Exception:
-            print('-----------------------------')
+            self._mark_completion(arquivos_processados)
+        
+        except Exception as e:
+            print('-' * 30)
             traceback.print_exc()
-            print('-----------------------------')
-            self.status_indexacao["terminado"] = True
+            print('-' * 30)
+            self._mark_completion()
 
-        self.status_indexacao["porcentagem"] = 100
-        self.status_indexacao["terminado"] = True
         return self.__vectorstore
 
+    # MÔøΩtodos auxiliares para melhor organizaÔøΩÔøΩo
+    def _update_progress(self, processed: int, total: int):
+        self.status_indexacao["porcentagem"] = int((processed / total) * 100)
 
-    def __indexing_batch(self, filename:str, chunks:List[Document]) -> None:
-        """Indexa chunks em lote no vector db."""
+    def _mark_completion(self, processed: int = 0):
+        self.status_indexacao["porcentagem"] = 100
+        self.status_indexacao["terminado"] = True
+        if processed > 0:
+            self.__vectorstore.persistir()
 
-        if not chunks or not self.__vectorstore:
-            print('Sem chunks e/ou vectorstore is null')
+    def __indexing_batch(self, filename: str, chunks: List[Document]) -> None:
+        """Indexa chunks em lote no vector db com verifica√ß√µes de seguran√ßa."""
+        
+        if not chunks or len(chunks) == 0:
+            print('Nenhum chunk fornecido para indexa√ß√£o.')
+            return
+            
+        if not self.__vectorstore:
+            print('VectorStore n√£o est√° inicializado.')
             return
 
         documents_to_add = []
         ids_to_add = []
-        # embeddings_to_add = []
-        # metadatas_to_add = []
+        skipped_documents = 0
 
-        for i, chunk in enumerate(chunks):
-            document_id = self.generate_id_filename(filename, i)
+        try:
+            for i, chunk in enumerate(chunks):
+                if not chunk or not hasattr(chunk, 'page_content'):
+                    print(f'Chunk inv√°lido no √≠ndice {i}, ignorando...')
+                    skipped_documents += 1
+                    continue
 
-            results = self.__vectorstore.get_by_ids([document_id]);
-            if results and results[0].id and document_id in results[0].id:
-                print(f"Documento com ID {document_id} j· existe na coleÁ„o.")
-                continue
+                # Garante que o conte√∫do seja string
+                if not isinstance(chunk.page_content, str):
+                    chunk.page_content = str(chunk.page_content)
 
-            #embedding = embedding_model.embed_documents([chunk.page_content])[0]
+                document_id = self.generate_id_filename(filename, i)
+                
+                try:
+                    results = self.__vectorstore.get_by_ids([document_id])
+                    if (results and isinstance(results, (list, tuple)) and \
+                    len(results) > 0 and hasattr(results[0], 'id') and \
+                    results[0].id == document_id):
+                        print(f"Documento com ID {document_id} j√° existe na cole√ß√£o.")
+                        skipped_documents += 1
+                        continue
+                except Exception as e:
+                    print(f"Erro ao verificar documento existente: {str(e)}")
+                    continue
 
-            documents_to_add.append(chunk)
-            ids_to_add.append(document_id)
-            #embeddings_to_add.append(embedding)
-            #metadatas_to_add.append(chunk.metadata)
+                documents_to_add.append(chunk)
+                ids_to_add.append(document_id)
 
-        if documents_to_add:
-            # , metadatas=metadatas_to_add
-            self.__vectorstore.add_documents(documents=documents_to_add, ids=ids_to_add)
-            print(f"Adicionados {len(documents_to_add)} documentos em lote.")
-
-        if chunks:
-            first_chunk_id = self.generate_id(chunks[0], 0)
-            print(f"ID do primeiro chunk: {first_chunk_id}")
+            if documents_to_add:
+                try:
+                    # Garante que todos os documentos tenham conte√∫do string
+                    final_docs = []
+                    for doc in documents_to_add:
+                        if not isinstance(doc.page_content, str):
+                            doc.page_content = str(doc.page_content)
+                        final_docs.append(doc)
+                    
+                    self.__vectorstore.add_documents(
+                        documents=final_docs,
+                        ids=ids_to_add
+                    )
+                    print(f"Adicionados {len(documents_to_add)} documentos em lote.")
+                except Exception as e:
+                    print(f"Erro ao adicionar documentos em lote: {str(e)}")
+                    traceback.print_exc()
+        except Exception as e:
+            print(f"Erro inesperado durante a indexa√ß√£o em lote: {str(e)}")
+            traceback.print_exc()

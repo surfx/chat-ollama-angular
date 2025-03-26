@@ -31,12 +31,30 @@ class ChunksAux:
         chunks = self.__text_splitter.split_documents([documento])
         return chunks
 
-    def get_chunks_doc_file(self, caminho_arquivo:str) -> List[Document]:
-        if (caminho_arquivo is None or not os.path.exists(caminho_arquivo)): return None
-        result = self.__docling_aux.convert_file(caminho_arquivo)
-        documento = Document(page_content=result.document.export_to_markdown(image_mode=ImageRefMode.EMBEDDED), metadata={"source": caminho_arquivo})
-        chunks = self.__text_splitter.split_documents([documento])
-        return chunks
+    def get_chunks_doc_file(self, caminho_arquivo: str) -> List[Document]:
+        if caminho_arquivo is None or not os.path.exists(caminho_arquivo):
+            return None
+    
+        try:
+            result = self.__docling_aux.convert_file(caminho_arquivo)
+            if not result or not hasattr(result, 'document'):
+                return None
+            
+            content = result.document.export_to_markdown(image_mode=ImageRefMode.EMBEDDED)
+            if not isinstance(content, str):
+                print('----------------------------')
+                print(content)
+                print('----------------------------')
+                content = str(content)
+            
+            documento = Document(
+                page_content=content,
+                metadata={"source": caminho_arquivo}
+            )
+            return self.__text_splitter.split_documents([documento])
+        except Exception as e:
+            print(f"Erro ao processar arquivo {caminho_arquivo}: {str(e)}")
+            return None
 
     def get_chunks_image(self, local_path:str) -> List[Document]:
         if (local_path is None): return None

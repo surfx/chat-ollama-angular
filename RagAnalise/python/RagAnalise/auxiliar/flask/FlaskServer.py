@@ -2,12 +2,14 @@
 import os
 import functools
 from typing import List, Tuple, Dict, Optional
-from auxiliar.db_vector.db_faiss.FaissIVectorStore import FaissAuxiliar, FaissIVectorStore, IVectorStore
+from auxiliar.db_vector.IVectorStore import IVectorStore
+from auxiliar.db_vector.db_chroma.ChromaIVectorStore import ChromaIVectorStore
+from auxiliar.db_vector.db_faiss.FaissIVectorStore import FaissIVectorStore
 from auxiliar.util.TorchInit import TorchInit
-from auxiliar.util.ConfigData import ConfigData
+from auxiliar.util.ConfigData import ConfigData, ETipoDB
 
 from auxiliar.util.DoclingAuxiliar import DoclingAuxiliar
-from auxiliar.util.SepararDocumentos import SepararDocumentos
+# from auxiliar.util.SepararDocumentos import SepararDocumentos
 from auxiliar.util.ChunksAux import ChunksAux, DocumentConverter
 from consultas_rag.ConsultaRag import ConsultaRag
 from indexacao.IndexarArquivos import IndexarArquivos
@@ -20,8 +22,7 @@ from werkzeug.datastructures import FileStorage
 
 class FlaskServer:
 
-    __start_torch = False
-    __use_faiss = True
+    __start_torch = True
     __config_data:ConfigData = None
     __docling_auxiliar:DoclingAuxiliar = None
     __doc_converter:DocumentConverter = None
@@ -32,10 +33,14 @@ class FlaskServer:
 
     def __create_class_dependencies(self)->None:
         if (self.__start_torch): TorchInit().init_torch()
-        self.__config_data = ConfigData()
+        if (not self.__config_data): self.__config_data = ConfigData()
 
-        if self.__use_faiss:
+        if self.__config_data.USE_DB == ETipoDB.Faiss:
             self.__ivector_store = FaissIVectorStore(self.__config_data.EMBEDDING_MODEL_NAME, self.__config_data.PERSIST_DB_DIRECTORY)
+        elif self.__config_data.USE_DB == ETipoDB.Chroma:
+            self.__ivector_store = ChromaIVectorStore(self.__config_data.EMBEDDING_MODEL_NAME, self.__config_data.PERSIST_DB_DIRECTORY)
+        else:
+            self.__ivector_store = None    
 
         self.__docling_auxiliar = DoclingAuxiliar(self.__config_data.LANG)
         self.__doc_converter = self.__docling_auxiliar.get_doc_converter()
@@ -80,14 +85,40 @@ class FlaskServer:
 
         try:
             for key, value in config_data_json.items():
-                if hasattr(self.__config_data, key.upper()):
-                    setattr(self.__config_data, key.upper(), value)
+                attr_name = key.upper()
+            
+                if hasattr(self.__config_data, attr_name):
+                    current_value = getattr(self.__config_data, attr_name)
+                
+                    # Caso especial para o enum ETipoDB
+                    if attr_name == "USE_DB":
+                        try:
+                            # Converte string para o enum (pode ser o nome ou valor)
+                            if isinstance(value, str):
+                                # Tenta pelo nome (ex: "Faiss")
+                                enum_value = ETipoDB[value]
+                            else:
+                                # Tenta pelo valor (ex: 1)
+                                enum_value = ETipoDB(value)
+                            setattr(self.__config_data, attr_name, enum_value)
+                        except (KeyError, ValueError) as e:
+                            return jsonify({
+                                "success": False,
+                                "message": f"Valor inválido para USE_DB. Use 'Faiss' (1) ou 'Chroma' (2)"
+                            }), 400
+                    else:
+                        # Para outros atributos, verifica o tipo se necessário
+                        if isinstance(current_value, set) and isinstance(value, list):
+                            setattr(self.__config_data, attr_name, set(value))
+                        else:
+                            setattr(self.__config_data, attr_name, value)
 
-            return jsonify({"success": True, "message": "Configurações atribuídas"}), 200
+            self.__create_class_dependencies()
+            return jsonify({"success": True, "message": "Configurações atualizadas com sucesso"}), 200
         except Exception as e:
             print(f"Erro ao processar configurações: {e}")
-            return jsonify({"success": False, "message": f"Erro ao configurar o servidor: {e}"}), 400
-    
+            return jsonify({"success": False, "message": f"Erro ao configurar o servidor: {e}"}), 500
+     
     def __funcao_callback(self, future: concurrent.futures.Future) -> None:
         try:
             vectorstore: IVectorStore = future.result()
@@ -129,16 +160,7 @@ class FlaskServer:
         return jsonify(self.__indexar_arquivos.status_indexacao), 200
     
     def configuracao_atual(self) -> Tuple[Dict[str, bool | str], int]:
-        config_dict = {
-            'LANG': self.__config_data.LANG,
-            'PERSIST_DB_DIRECTORY': self.__config_data.PERSIST_DB_DIRECTORY,
-            'UPLOAD_PATH_TEMP': self.__config_data.UPLOAD_PATH_TEMP,
-            'LOCAL_MODEL': self.__config_data.LOCAL_MODEL,
-            'EMBEDDING_MODEL_NAME': self.__config_data.EMBEDDING_MODEL_NAME,
-            'ALLOWED_EXTENSIONS': list(self.__config_data.ALLOWED_EXTENSIONS),
-            'EXTENSOES_IMAGENS': list(self.__config_data.EXTENSOES_IMAGENS)
-        }
-        return jsonify(config_dict), 200
+        return jsonify(self.__config_data.to_dic()), 200
     
     def allowed_file(self, filename: str) -> bool:
         return '.' in filename and filename.rsplit('.', 1)[1].lower() in self.__config_data.ALLOWED_EXTENSIONS
@@ -176,6 +198,22 @@ class FlaskServer:
     
     def index(self) -> str:
         config_string: str = str(self.__config_data)
+        # Usando aspas triplas para evitar conflito com as aspas internas
+        curl_command = """curl -X POST \\
+      http://localhost:5000/configuracoes \\
+      -H "Content-Type: application/json" \\
+      -d '{
+        "query_prompt": "Você é um assistente de modelo de linguagem de IA. Sua tarefa é gerar cinco versões diferentes da pergunta do usuário fornecida para recuperar documentos relevantes de um banco de dados vetorial. Ao gerar múltiplas perspectivas sobre a pergunta do usuário, seu objetivo é ajudar o usuário a superar algumas das limitações da pesquisa de similaridade baseada em distância. Forneça essas perguntas alternativas separadas por quebras de linha.",
+        "lang": "por",
+        "persist_db_directory": "/home/emerson/projetos/chat-ollama-angular/db",
+        "upload_path_temp": "/home/emerson/projetos/chat-ollama-angular/temp",
+        "local_model": "deepseek-r1",
+        "embedding_model_name": "nomic-embed-text",
+        "allowed_extensions": ["txt", "pdf", "png", "jpg", "jpeg", "gif", "html"],
+        "extensoes_imagens": [".jpg", ".jpeg", ".png", ".gif", ".bmp"],
+        "use_db": "Faiss"
+      }'"""
+    
         html_content: str = f"""
         <!DOCTYPE html>
         <html lang="pt-br">
@@ -186,13 +224,13 @@ class FlaskServer:
         <body>
             <h1>Flask server</h1>
             <a href="https://github.com/surfx/chat-ollama-angular" target="_blank">Projeto Git chat-ollama-angular</a>
-            
+        
             <h2>Rag query</h2>
             <pre>curl "http://127.0.0.1:5000/doQuestion?prompt=Como+jogar+monopoly+%3F"</pre>
 
             <h2>Delete Db</h2>
             <pre>curl -X DELETE "http://127.0.0.1:5000/deleteDb"</pre>
-            
+        
             <h2>Status</h2>
             <pre>curl "http://127.0.0.1:5000/status"</pre>
 
@@ -201,43 +239,29 @@ class FlaskServer:
 
             <h2>Configuração Atual</h2>
             <pre>curl http://localhost:5000/configuracaoAtual</pre>
-            
+        
             <h2>Update Config</h2>
-            <pre>
-curl -X POST \
--H "Content-Type: application/json" \
--d '{{
-    "query_prompt": "novo query prompt...",
-    "lang": "por",
-    "persist_db_directory": "/home/emerson/projetos/chat-ollama-angular/db",
-    "upload_path_temp": "/home/emerson/projetos/chat-ollama-angular/temp",
-    "local_model": "deepseek-r1",
-    "embedding_model_name": "nomic-embed-text",
-    "allowed_extensions": ["txt", "pdf", "png", "jpg", "jpeg", "gif", "html"],
-    "extensoes_imagens": [".jpg", ".jpeg", ".png", ".gif", ".bmp"]
-}}' \
-http://127.0.0.1:5000/configuracoes
-            </pre>
+            <pre>{curl_command}</pre>
 
             <h2>Upload example</h2>
             <pre>
-curl 'http://127.0.0.1:5000/upload' \
-  -H 'Accept: application/json, text/plain, */*' \
-  -H 'Accept-Language: pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7' \
-  -H 'Connection: keep-alive' \
-  -H 'Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryP9IhvgxGJbinBGj2' \
-  -H 'DNT: 1' \
-  -H 'Origin: http://localhost:4200' \
-  -H 'Referer: http://localhost:4200/' \
-  -H 'Sec-Fetch-Dest: empty' \
-  -H 'Sec-Fetch-Mode: cors' \
-  -H 'Sec-Fetch-Site: cross-site' \
-  -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36' \
-  -H 'sec-ch-ua: "Chromium";v="134", "Not:A-Brand";v="24", "Google Chrome";v="134"' \
-  -H 'sec-ch-ua-mobile: ?0' \
-  -H 'sec-ch-ua-platform: "Windows"' \
-  -H 'sec-gpc: 1' \
-  --data-raw $'------WebKitFormBoundaryP9IhvgxGJbinBGj2\r\nContent-Disposition: form-data; name="files"; filename="486377-2048x1310-desktop-hd-blade-runner-2049-background-photo.jpg"\r\nContent-Type: image/jpeg\r\n\r\n\r\n------WebKitFormBoundaryP9IhvgxGJbinBGj2--\r\n'
+    curl 'http://127.0.0.1:5000/upload' \\
+      -H 'Accept: application/json, text/plain, */*' \\
+      -H 'Accept-Language: pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7' \\
+      -H 'Connection: keep-alive' \\
+      -H 'Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryP9IhvgxGJbinBGj2' \\
+      -H 'DNT: 1' \\
+      -H 'Origin: http://localhost:4200' \\
+      -H 'Referer: http://localhost:4200/' \\
+      -H 'Sec-Fetch-Dest: empty' \\
+      -H 'Sec-Fetch-Mode: cors' \\
+      -H 'Sec-Fetch-Site: cross-site' \\
+      -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36' \\
+      -H 'sec-ch-ua: "Chromium";v="134", "Not:A-Brand";v="24", "Google Chrome";v="134"' \\
+      -H 'sec-ch-ua-mobile: ?0' \\
+      -H 'sec-ch-ua-platform: "Windows"' \\
+      -H 'sec-gpc: 1' \\
+      --data-raw $'------WebKitFormBoundaryP9IhvgxGJbinBGj2\\r\\nContent-Disposition: form-data; name="files"; filename="486377-2048x1310-desktop-hd-blade-runner-2049-background-photo.jpg"\\r\\nContent-Type: image/jpeg\\r\\n\\r\\n\\r\\n------WebKitFormBoundaryP9IhvgxGJbinBGj2--\\r\\n'
             </pre>
 
             <h2>Configuração Atual</h2>
