@@ -4,12 +4,11 @@ Este projeto sobe um servidor Python Flask para indexar arquivos com [Docling](h
 em uma base de dados vetorial [Faiss](https://ai.meta.com/tools/faiss/) para posterior consulta RAG com LLMs servidos
 pelo [Ollama](https://ollama.com/).
 
-O servidor Flask executa no endereço [http://127.0.0.1:5000](http://127.0.0.1:5000), arquivo `rag_python_faiss.py`
+O servidor Flask executa no endereço [http://127.0.0.1:5000](http://127.0.0.1:5000), arquivo `RagAnalise.py`
 
-Exemplo de indexação curl: 
-- `curl -X POST -H "Content-Type: text/plain" -d "D:\meus_documentos\workspace\ia\chat-ollama-angular\data" http://127.0.0.1:5000/indexarFaissdb`
+Inicie attravés do script `./run.sh`
 
-Para mais informações veja a seção `Curls` > `Indexar`.
+![](readme_imagens/flask_server.png)
 
 ## Consulta
 
@@ -37,6 +36,7 @@ Saída:
 | llama3.2:latest         | a80c4f17acd5 | 2.0 GB |
 | nomic-embed-text:latest | 0a109f422b47 | 274 MB |
 
+Instale conforme interesse
 
 # Dependências
 
@@ -49,7 +49,7 @@ curl -o get-pip.py https://bootstrap.pypa.io/get-pip.py
 python get-pip.py
 ```
 
-## C++
+## C++ (Windows)
 
 Instale o [vs_BuildTools.exe](https://visualstudio.microsoft.com/pt-br/visual-cpp-build-tools/)
 
@@ -265,11 +265,10 @@ Devido ao tamanho dos arquivos gerados pelo Chromadb, falha nos métodos de `del
 
 # TODO
 
-- [ ] utilizar o `tesserocr` para fazer o OCR das imagens dos PDFs
 - [x] Integrar o servidor Flask RAG com o projeto [chat ollama angular](https://github.com/surfx/chat-ollama-angular).
-- [ ] Alterar o projeto [rag-analise-yt](https://github.com/surfx/rag-analise-yt) na indexação - receber um conjunto de arquivos via POST
+- [x] Alterar o projeto `RagAnalise` indexação - receber um conjunto de arquivos via POST
 - [x] Criar GET para is alive
-- [ ] Parametrizar o serviço
+- [x] Parametrizar o serviço
 
 # Créditos
 

@@ -18,27 +18,27 @@ export class PythonRagService {
   }
   constructor(private http: HttpClient) { }
 
-  public indexarFaissdb(data: string): Observable<any> {
-    const url = `${this.apiUrl}indexarFaissdb`;
-    const headers = new HttpHeaders({ 'Content-Type': 'text/plain' });
+  // public indexarFaissdb(data: string): Observable<any> {
+  //   const url = `${this.apiUrl}indexarFaissdb`;
+  //   const headers = new HttpHeaders({ 'Content-Type': 'text/plain' });
 
-    return this.http.post(url, data, { headers });
-  }
+  //   return this.http.post(url, data, { headers });
+  // }
 
   public doQuestion(prompt: string): Observable<any> {
     const url = `${this.apiUrl}doQuestion?prompt=${encodeURIComponent(prompt)}`;
     return this.http.get(url);
   }
 
-  public deleteFaiss(): Observable<any> {
-    const url = `${this.apiUrl}deleteFaiss`;
+  public deleteDb(): Observable<any> {
+    const url = `${this.apiUrl}deleteDb`;
     return this.http.delete(url);
   }
 
-  public resetChroma(): Observable<any> {
-    const url = `${this.apiUrl}resetChroma`;
-    return this.http.get(url);
-  }
+  // public resetChroma(): Observable<any> {
+  //   const url = `${this.apiUrl}resetChroma`;
+  //   return this.http.get(url);
+  // }
 
   public statusService(): Observable<any> {
     const url = `${this.apiUrl}status`;
@@ -102,6 +102,11 @@ export class PythonRagService {
     // Converter o objeto ConfiguracoesRAG para snake_case antes de enviar
     const configuracoesSnakeCase = this.camelToSnakeCase(configuracoes);
     return this.http.post(url, configuracoesSnakeCase, { headers });
+  }
+
+  public configuracaoAtual(): Observable<any> {
+    const url = `${this.apiUrl}configuracaoAtual`;
+    return this.http.get(url);
   }
 
 

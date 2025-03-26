@@ -114,9 +114,9 @@ npm i clipboard@^2.0.11 --save
 - [x] Adicionar os estilos para as seções de código (resposta Ollama)
 - [x] Adicionar botão para copiar o código
 - [x] Implementar `ollama.abort()`
-- [ ] Implementar o projeto [rag-analise-yt](https://github.com/surfx/rag-analise-yt)
-- [ ] Explorar a Api de consulta para o Ollama
-- [ ] Alterar o projeto [rag-analise-yt](https://github.com/surfx/rag-analise-yt) na indexação - receber um conjunto de arquivos via POST
+- [x] Indexação e Análise RAG
+- [x] Explorar a Api de consulta para o Ollama
+- [x] Alterar o projeto `RagAnalise` indexação - receber um conjunto de arquivos via POST
 
 # 🔗 Referências
 

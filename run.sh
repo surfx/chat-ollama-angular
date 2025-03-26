@@ -34,7 +34,7 @@ ANGULAR_PID=$!
 # -----------------------
 # flask
 # -----------------------
-cd /home/emerson/projetos/chat-ollama-angular/rag-analise-yt
+cd /home/emerson/projetos/chat-ollama-angular/RagAnalise
 ./run.sh &
 FLASK_PID=$!
 

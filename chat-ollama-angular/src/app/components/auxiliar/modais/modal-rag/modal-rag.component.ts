@@ -101,7 +101,7 @@ export class ModalRagComponent {
     // TODO: criar modal y/n
     if (!confirm('Deseja deletar toda a base de dados RAG ?')) { return; }
 
-    this.pythonRagService.deleteFaiss().subscribe({
+    this.pythonRagService.deleteDb().subscribe({
       next: (res) => {
         this.mensagemComponente?.show('Faiss db excluído', TipoMensagem.INFO, 1000);
       },

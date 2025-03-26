@@ -1,6 +1,6 @@
 # <img src="chat-ollama-angular/readme_imagens/ollama_readme.png" width="15" /> Chat ollama
 
-Projetos [chat ollama](https://github.com/surfx/chat-ollama-angular/tree/master/chat-ollama-angular) e [python docling faiss ollama rag](https://github.com/surfx/chat-ollama-angular/tree/master/rag-analise-yt)
+Projetos [chat ollama](https://github.com/surfx/chat-ollama-angular/tree/master/chat-ollama-angular) e `RagAnalise`
 
 ![Chat ollama](chat-ollama-angular/readme_imagens/chat_ollama.png)
 
@@ -82,33 +82,19 @@ Para o Linux: `export TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata`
 
 # Iniciar
 
-## 1. Ollama (WSL)
-
 ```bash
-ollama serve
-```
-
-## 2. Chat angular (WSL)
-
-```bash
-cd /home/emerson/projetos/chat-ollama-angular/chat-ollama-angular
 ./run.sh
 ```
 
-Por padrão o projeto executa em:
-
-[http://localhost:4200/](http://localhost:4200/)
-
-## 3. server flask faiss (Windows)
-
-```pwsh
-E: && cd E:\programas\ia\virtual_environment && my_env_3129\Scripts\activate
-uv run "D:\meus_documentos\workspace\ia\chat-ollama-angular\rag-analise-yt\python\flask_server\server_flask_faiss.py"
-```
+| Serviço       | URL Local                           | Descrição               |
+|:-------------:|-------------------------------------|:------------------------|
+| 🅰️ Angular    | [http://localhost:4200/](http://localhost:4200/) | Frontend web            |
+| 🐍 Flask      | [http://127.0.0.1:5000/](http://127.0.0.1:5000/) | Backend API             |
+| 🤖 Ollama     | [http://localhost:11434](http://localhost:11434) | Modelos de LLM          |
 
 # Informações
 
 Para mais informações, veja:
 
 - [chat ollama](https://github.com/surfx/chat-ollama-angular/tree/master/chat-ollama-angular)
-- [python docling faiss ollama rag](https://github.com/surfx/chat-ollama-angular/tree/master/rag-analise-yt)
+- [RagAnalise](https://github.com/surfx/chat-ollama-angular/tree/master/RagAnalise)
